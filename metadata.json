@@ -1,0 +1,6 @@
+{
+  "name": "Radar",
+  "description": "Plataforma urbana interactiva de eventos familiares, culturales y sociales en Villa Nueva con mapa geolocalizado, calendario dinámico, subagentes IA y panel de administración.",
+  "requestFramePermissions": ["geolocation", "notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

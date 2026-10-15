@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-90s-display: 'Archivo Black', 'Righteous', Impact, sans-serif;
+    --font-90s-fun: 'Righteous', cursive, sans-serif;
+    --font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  }
+  
+  body {
+    font-family: var(--font-sans);
+    background-color: #FFFDF0;
+    color: #000000;
+  }
+}
+
+.font-90s {
+  font-family: var(--font-90s-display);
+  letter-spacing: -0.02em;
+}
+
+.font-fun {
+  font-family: var(--font-90s-fun);
+}
+
+/* 90s Neo-Brutalist & Memphis Utility Classes */
+.neo-box {
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.neo-box-sm {
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+}
+
+.neo-box-lg {
+  border: 4px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.neo-btn {
+  border: 2px solid #000000;
+  font-weight: 800;
+  box-shadow: 3px 3px 0px #000000;
+  transition: all 0.15s ease-in-out;
+}
+
+.neo-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #000000;
+}
+
+.neo-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+.neo-card {
+  border: 3px solid #000000;
+  background-color: #ffffff;
+  box-shadow: 5px 5px 0px #000000;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.neo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 8px 8px 0px #000000;
+}
+
+/* 90s Pop Patterns */
+.bg-dots-90s {
+  background-image: radial-gradient(#000000 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+.bg-dots-yellow {
+  background-color: #FFE600;
+  background-image: radial-gradient(#000000 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+.bg-dots-cyan {
+  background-color: #00F0FF;
+  background-image: radial-gradient(#000000 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+.bg-dots-pink {
+  background-color: #FF007F;
+  background-image: radial-gradient(#ffffff 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+.bg-grid-90s {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.08) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1.5px, transparent 1.5px);
+}
+
+.bg-diagonal-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    #000000,
+    #000000 10px,
+    #FFE600 10px,
+    #FFE600 20px
+  );
+}
+
+.bg-stripes-neon {
+  background: repeating-linear-gradient(
+    -45deg,
+    #00F0FF,
+    #00F0FF 12px,
+    #FF007F 12px,
+    #FF007F 24px
+  );
+}
+
+/* Custom 90s Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #FFE600;
+  border-left: 2px solid #000;
+}
+::-webkit-scrollbar-thumb {
+  background: #FF007F;
+  border: 2px solid #000;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00F0FF;
+}
+
+/* 90s Marquee Ticker animation */
+@keyframes ticker {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-ticker {
+  animation: ticker 25s linear infinite;
+  display: inline-flex;
+}
