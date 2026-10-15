@@ -18,10 +18,10 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const storedPin = localStorage.getItem('radar_admin_password') || 'radar2026';
+    const validPasswords = ['radar2026', 'admin123'];
     
     // Contraseñas válidas aceptadas por seguridad
-    if (password === storedPin || password === 'admin123' || password === 'radar2026') {
+    if (validPasswords.includes(password.trim())) {
       setError(false);
       sessionStorage.setItem('radar_admin_session', 'active');
       setPassword('');

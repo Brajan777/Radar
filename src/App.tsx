@@ -51,28 +51,10 @@ import {
 } from 'lucide-react';
 
 export default function App() {
-  // Persistence in localStorage with automatic migration to Radar Sur
-  const [events, setEvents] = useState<EventItem[]>(() => {
-    // Purge legacy Villa Nueva-only cache if not migrated yet
-    if (!localStorage.getItem('radar_sur_migrated_v2')) {
-      localStorage.removeItem('vn_events');
-      localStorage.removeItem('vn_ads');
-      localStorage.setItem('radar_sur_migrated_v2', 'true');
-      return INITIAL_EVENTS;
-    }
-    const saved = localStorage.getItem('radar_sur_events');
-    return saved ? JSON.parse(saved) : INITIAL_EVENTS;
-  });
-
-  const [user, setUser] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('radar_sur_user');
-    return saved ? JSON.parse(saved) : INITIAL_USER;
-  });
-
-  const [entrepreneurAds, setEntrepreneurAds] = useState<EntrepreneurAd[]>(() => {
-    const saved = localStorage.getItem('radar_sur_ads');
-    return saved ? JSON.parse(saved) : INITIAL_ADS;
-  });
+  // Estados directos en memoria (sin localStorage para garantizar siempre los datos más recientes en Vercel)
+  const [events, setEvents] = useState<EventItem[]>(INITIAL_EVENTS);
+  const [user, setUser] = useState<UserProfile>(INITIAL_USER);
+  const [entrepreneurAds, setEntrepreneurAds] = useState<EntrepreneurAd[]>(INITIAL_ADS);
 
   const [subagents, setSubagents] = useState<AiSubagent[]>(INITIAL_SUBAGENTS);
   const [metrics, setMetrics] = useState<PlatformMetrics>(INITIAL_METRICS);
@@ -159,18 +141,20 @@ export default function App() {
     };
   }, []);
 
-  // Sync to localStorage
+  // Limpieza defensiva de cualquier clave antigua guardada previamente en navegadores
   useEffect(() => {
-    localStorage.setItem('radar_sur_events', JSON.stringify(events));
-  }, [events]);
-
-  useEffect(() => {
-    localStorage.setItem('radar_sur_user', JSON.stringify(user));
-  }, [user]);
-
-  useEffect(() => {
-    localStorage.setItem('radar_sur_ads', JSON.stringify(entrepreneurAds));
-  }, [entrepreneurAds]);
+    try {
+      localStorage.removeItem('vn_events');
+      localStorage.removeItem('vn_ads');
+      localStorage.removeItem('vn_user');
+      localStorage.removeItem('radar_sur_events');
+      localStorage.removeItem('radar_sur_ads');
+      localStorage.removeItem('radar_sur_user');
+      localStorage.removeItem('radar_sur_migrated_v2');
+    } catch {
+      // Ignorar si el entorno bloquea storage
+    }
+  }, []);
 
   // Try fetching actual device GPS silently on mount
   useEffect(() => {
