@@ -27,7 +27,7 @@ const ai = process.env.GEMINI_API_KEY
     })
   : null;
 
-// Subagent 1: Guardián Comunitario (Moderación en Tiempo Real)
+// Subagent 1: Guardián Comunitario del Sur (Moderación en Tiempo Real)
 app.post('/api/subagents/moderate', async (req: Request, res: Response) => {
   const { text, authorName, title } = req.body;
 
@@ -41,12 +41,12 @@ app.post('/api/subagents/moderate', async (req: Request, res: Response) => {
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
-        contents: `Analiza este aporte comunitario para el portal de eventos de Villa Nueva, Guatemala:
+        contents: `Analiza este aporte comunitario para el portal de eventos Radar Sur (que cubre Villa Nueva, San Miguel Petapa y Villa Canales, Guatemala):
 Título: "${title || ''}"
 Autor: "${authorName || 'Vecino'}"
 Contenido: "${text}"
 
-Evalúa si es apto para un ambiente familiar y comunitario en Villa Nueva.
+Evalúa si es apto para un ambiente familiar y comunitario en la región sur.
 Devuelve únicamente un JSON con la siguiente estructura (sin markdown adicional):
 {
   "status": "safe" | "flagged" | "quarantined",
@@ -58,7 +58,7 @@ Devuelve únicamente un JSON con la siguiente estructura (sin markdown adicional
 }`,
         config: {
           systemInstruction:
-            'Eres el "Subagente Guardián de la Comunidad", un asistente de IA encargado de la moderación en tiempo real y preservación del ambiente familiar en Villa Nueva, Guatemala. Eres cordial, protector y constructivo.',
+            'Eres el "Subagente Guardián del Sur", un asistente de IA encargado de la moderación en tiempo real y preservación del ambiente familiar en Villa Nueva, San Miguel Petapa y Villa Canales, Guatemala. Eres cordial, protector y constructivo.',
           responseMimeType: 'application/json',
           temperature: 0.2,
         },
@@ -69,7 +69,7 @@ Devuelve únicamente un JSON con la siguiente estructura (sin markdown adicional
       res.json({
         ...parsed,
         subagentId: 'agent-guardian',
-        subagentName: 'Guardián Comunitario',
+        subagentName: 'Guardián del Sur',
         timestamp: new Date().toISOString(),
       });
       return;
@@ -86,8 +86,8 @@ Devuelve únicamente un JSON con la siguiente estructura (sin markdown adicional
   const familyScore = hasToxic ? 35 : 98;
   const status = hasToxic ? 'flagged' : 'safe';
   const analysisNotes = hasToxic
-    ? 'El Guardián Comunitario detectó términos sensibles que requieren revisión humana.'
-    : 'Aprobado automáticamente con el sello de Convivencia Familiar 100% Segura para Villa Nueva.';
+    ? 'El Guardián del Sur detectó términos sensibles que requieren revisión humana.'
+    : 'Aprobado automáticamente con el sello de Convivencia Familiar 100% Segura para Villa Nueva, Petapa y Villa Canales.';
 
   res.json({
     status,
@@ -99,20 +99,20 @@ Devuelve únicamente un JSON con la siguiente estructura (sin markdown adicional
       ? 'Moderar antes de publicar'
       : 'Publicar de inmediato y destacar en el feed comunitario.',
     subagentId: 'agent-guardian',
-    subagentName: 'Guardián Comunitario',
+    subagentName: 'Guardián del Sur',
     timestamp: new Date().toISOString(),
   });
 });
 
-// Subagent 2: Curador de Eventos Villa Nueva (Optimización & Enriquecimiento)
+// Subagent 2: Curador de Eventos del Sur (Optimización & Enriquecimiento)
 app.post('/api/subagents/curate', async (req: Request, res: Response) => {
-  const { title, description, category, zona, targetAudience } = req.body;
+  const { title, description, category, zona, municipio, targetAudience } = req.body;
 
   if (ai) {
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
-        contents: `Enriquece esta propuesta de evento vecinal para el municipio de Villa Nueva, Guatemala:
+        contents: `Enriquece esta propuesta de evento vecinal para el área metropolitana sur de Guatemala (Municipio: ${municipio || 'Villa Nueva / Petapa / Villa Canales'}):
 Título: "${title}"
 Categoría: "${category}"
 Zona: "${zona}"
@@ -122,15 +122,15 @@ Descripción base: "${description}"
 Devuelve un JSON con:
 {
   "catchyUrbanTitle": string (título llamativo, con energía urbana comunitaria),
-  "enrichedDescription": string (descripción cálida, maximalista y entusiasta para los vecinos de Villa Nueva),
-  "recommendedAmenities": string[] (ej: Parqueo PMT, Hidratación, Seguridad, Toldos),
+  "enrichedDescription": string (descripción cálida, maximalista y entusiasta para los vecinos del Sur),
+  "recommendedAmenities": string[] (ej: Parqueo PMT coordinado, Hidratación, Seguridad, Toldos),
   "suggestedTags": string[],
-  "logisticsTips": string (consejos prácticos sobre parqueo, horarios y acceso en Villa Nueva),
+  "logisticsTips": string (consejos prácticos sobre parqueo, horarios y acceso por CA-9, VAS o Bulevar El Frutal),
   "estimatedAttendance": number
 }`,
         config: {
           systemInstruction:
-            'Eres el "Subagente Curador de Eventos VN", un creativo municipal de Villa Nueva experto en cultura urbana, actividades familiares, convivencia ciudadana y logística barrial.',
+            'Eres el "Subagente Curador de Eventos Sur", un creativo intermunicipal experto en cultura urbana, actividades familiares, convivencia ciudadana y logística barrial en Villa Nueva, San Miguel Petapa y Villa Canales.',
           responseMimeType: 'application/json',
           temperature: 0.7,
         },
@@ -141,7 +141,7 @@ Devuelve un JSON con:
       res.json({
         ...parsed,
         subagentId: 'agent-curator',
-        subagentName: 'Curador de Experiencias VN',
+        subagentName: 'Curador de Experiencias Sur',
       });
       return;
     } catch (err: any) {
@@ -151,45 +151,45 @@ Devuelve un JSON con:
 
   // Creative deterministic fallback
   res.json({
-    catchyUrbanTitle: `¡Gran ${title || 'Encuentro Comunitario'} en ${zona || 'Villa Nueva'}!`,
-    enrichedDescription: `${description || 'Un espacio vibrante y seguro para compartir en comunidad'}. ¡Trae a tu familia, amigos y vecinos para disfrutar de un día lleno de energía positiva, sana recreación y orgullo villanovano!`,
+    catchyUrbanTitle: `¡Gran ${title || 'Encuentro Comunitario'} en ${zona || 'el Sur'}!`,
+    enrichedDescription: `${description || 'Un espacio vibrante y seguro para compartir en comunidad'}. ¡Trae a tu familia, amigos y vecinos para disfrutar de un día lleno de energía positiva, sana recreación y orgullo del Sur!`,
     recommendedAmenities: [
-      'Coordinación PMT Villa Nueva',
+      'Coordinación PMT (VN · Petapa · Canales)',
       'Punto de Hidratación Gratuita',
       'Área de Primeros Auxilios',
       'Zona Pet Friendly',
       'Toldos con Sombra Familiar',
     ],
-    suggestedTags: [category || 'Comunidad', 'VillaNuevaActiva', 'FamiliaVN', 'Convivencia'],
+    suggestedTags: [category || 'Comunidad', 'RadarSur', 'VillaNueva', 'Petapa', 'VillaCanales'],
     logisticsTips:
       'Recomendamos llegar 30 minutos antes para aprovechar parqueos autorizados y disfrutar de los stands de bienvenida.',
-    estimatedAttendance: Math.floor(Math.random() * 400) + 250,
+    estimatedAttendance: Math.floor(Math.random() * 400) + 300,
     subagentId: 'agent-curator',
-    subagentName: 'Curador de Experiencias VN',
+    subagentName: 'Curador de Experiencias Sur',
   });
 });
 
-// Subagent 3: Asistente Ciudadano y Concierge Comunitario
+// Subagent 3: Asistente Ciudadano y Concierge Comunitario del Sur
 app.post('/api/subagents/concierge', async (req: Request, res: Response) => {
-  const { question, userZona } = req.body;
+  const { question, userZona, userMunicipio } = req.body;
 
   if (ai) {
     try {
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
-        contents: `Un vecino de Villa Nueva (${userZona || 'Municipio de Villa Nueva'}) pregunta: "${question}".
-Responde como el Concierge Comunitario de Villa Nueva. Sé muy cálido, servicial, entusiasta, brinda datos útiles sobre transporte, accesibilidad, clima y los eventos locales de Villa Nueva (Parque Central, El Frutal, Santa Clara, Naciones Unidas, etc.).`,
+        contents: `Un vecino del área sur de Guatemala (${userMunicipio || 'Villa Nueva / San Miguel Petapa / Villa Canales'}, ${userZona || 'Zona Sur'}) pregunta: "${question}".
+Responde como el Concierge Ciudadano de Radar Sur. Sé muy cálido, servicial, entusiasta, brinda datos útiles sobre transporte (CA-9, VAS, Bulevar El Frutal, Carretera a Canales), accesibilidad, parqueos coordinados por las PMT de Villa Nueva, Petapa y Canales, y los eventos destacados (Festival del Chuchito, Festival del Mango, Feria de la Piña, Bicitour Intermunicipal).`,
         config: {
           systemInstruction:
-            'Eres el "Subagente Concierge Comunitario de Villa Nueva", el guía local digital más amigable de la ciudad. Conoces cada rincón de Villa Nueva y promueves la unión vecinal.',
+            'Eres el "Subagente Concierge Ciudadano de Radar Sur", el guía local digital más amigable de Villa Nueva, San Miguel Petapa y Villa Canales. Conoces cada rincón del sur y promueves la unión comunitaria y el comercio local.',
           temperature: 0.6,
         },
       });
 
       res.json({
-        answer: response.text?.trim() || '¡Con gusto te ayudamos a disfrutar los eventos de Villa Nueva!',
-        subagentId: 'agent-analyst',
-        subagentName: 'Concierge Comunitario VN',
+        answer: response.text?.trim() || '¡Con gusto te ayudamos a disfrutar los eventos del Sur metropolitano!',
+        subagentId: 'agent-concierge',
+        subagentName: 'Concierge Ciudadano del Sur',
       });
       return;
     } catch (err: any) {
@@ -198,9 +198,9 @@ Responde como el Concierge Comunitario de Villa Nueva. Sé muy cálido, servicia
   }
 
   res.json({
-    answer: `¡Hola vecino! En Villa Nueva tenemos actividades increíbles para compartir en familia. Te recomendamos el Festival del Chuchito en el Parque Central (con parqueo accesible y marimba) y la Ciclovía en El Frutal. Si vienes en carro, PMT mantiene carriles despejados y señalizados.`,
-    subagentId: 'agent-analyst',
-    subagentName: 'Concierge Comunitario VN',
+    answer: `¡Hola vecino del Sur! Tenemos una agenda activa uniendo Villa Nueva, San Miguel Petapa y Villa Canales. Te recomendamos el Festival del Chuchito en el Parque Central de Villa Nueva, el Festival del Mango en Petapa, y la Gran Feria de la Piña en Villa Canales. Si vas en auto, las 3 PMT mantienen operativos viales en Bulevar El Frutal, CA-9 y VAS para parqueos seguros.`,
+    subagentId: 'agent-concierge',
+    subagentName: 'Concierge Ciudadano del Sur',
   });
 });
 
