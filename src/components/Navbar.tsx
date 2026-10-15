@@ -77,23 +77,23 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
             <span className="px-2 py-0.5 bg-[#FF007F] text-white font-90s text-[10px] uppercase tracking-wider border border-black shadow-[2px_2px_0_#000] shrink-0">
-              ★ RADAR OFICIAL
+              ★ RADAR SUR OFICIAL
             </span>
             <div className="overflow-hidden relative flex-1 min-w-0 max-w-[220px] xs:max-w-[280px] sm:max-w-[600px] md:max-w-[800px]">
               <div className="animate-ticker whitespace-nowrap flex items-center gap-6 text-[11px] font-bold">
-                <span>★ RADAR ★ DETECCIÓN DE ACTIVIDADES 12 ZONAS</span>
-                <span>★ MUNICIPAL & PRIVADO</span>
-                <span>★ EMPRENDEDORES & BAZAR EN VIVO</span>
-                <span>★ ENLACES DIRECTOS A GOOGLE MAPS Y WAZE</span>
-                <span>★ RADAR ★ DETECCIÓN DE ACTIVIDADES 12 ZONAS</span>
-                <span>★ MUNICIPAL & PRIVADO</span>
+                <span>★ RADAR SUR ★ 3 MUNICIPIOS: VILLA NUEVA · SAN MIGUEL PETAPA · VILLA CANALES</span>
+                <span>★ ALCALDÍAS & EXCLUSIVOS RADAR</span>
+                <span>★ CUPONES QR & EMPRENDEDORES</span>
+                <span>★ RUTAS A GOOGLE MAPS Y WAZE</span>
+                <span>★ RADAR SUR ★ 3 MUNICIPIOS: VILLA NUEVA · SAN MIGUEL PETAPA · VILLA CANALES</span>
+                <span>★ ALCALDÍAS & EXCLUSIVOS RADAR</span>
               </div>
             </div>
           </div>
 
           <div className="hidden md:flex items-center gap-3 shrink-0 text-[11px]">
             <span className="flex items-center gap-1 font-black bg-white px-2 py-0.5 border border-black shadow-[2px_2px_0_#000]">
-              <span className="text-[#FF007F]">PMT</span> Emergencias: 1531
+              <span className="text-[#FF007F]">3 PMT:</span> VN 1531 · Petapa 1550 · Canales 1545
             </span>
             <a 
               href="https://whatsapp.com" 
@@ -102,7 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="bg-[#00F0FF] hover:bg-[#CCFF00] px-2 py-0.5 border border-black font-black text-black shadow-[2px_2px_0_#000] transition-colors flex items-center gap-1"
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span>WhatsApp Radar</span>
+              <span>WhatsApp Radar Sur</span>
             </a>
           </div>
         </div>
@@ -125,10 +125,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <div>
               <span className="text-2xl sm:text-3xl font-90s tracking-tight text-black block leading-none group-hover:text-[#FF007F] transition-colors">
-                RADAR
+                RADAR SUR
               </span>
               <span className="text-[10px] uppercase font-black tracking-wider text-black block mt-1">
-                Detección de Eventos · Villa Nueva
+                Villa Nueva · Petapa · Villa Canales
               </span>
             </div>
           </a>

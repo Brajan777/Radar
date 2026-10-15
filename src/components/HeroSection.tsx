@@ -17,14 +17,18 @@ import {
   Zap,
   Star
 } from 'lucide-react';
-import { VillaNuevaZona } from '../types';
+import { VillaNuevaZona, MunicipioSur } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
 
 interface HeroSectionProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  selectedMunicipio: string;
+  onMunicipioChange: (m: string) => void;
   selectedZona: string;
   onZonaChange: (z: string) => void;
+  quickFilter: string;
+  onQuickFilterChange: (q: string) => void;
   onOpenMap?: () => void;
   onOpenCalendar: () => void;
   onOpenPropose?: () => void;
@@ -37,23 +41,44 @@ interface HeroSectionProps {
   totalEventsCount: number;
 }
 
-const ZONAS_LIST: VillaNuevaZona[] = [
-  'Zona 1 - Centro Histórico',
-  'Zona 2 - Linda Vista',
-  'Zona 3 - Ciudad del Sol',
-  'Zona 4 - Santa Clara',
-  'Zona 5 - El Frutal',
-  'Zona 6 - Mártires del Pueblo',
-  'Zona 10 - Ciudad Real',
-  'Zona 12 - San José Villa Nueva',
-  'Bárcena & Naciones Unidas',
-];
+export const ZONAS_BY_MUNICIPIO: Record<MunicipioSur, string[]> = {
+  'Villa Nueva': [
+    'Zona 1 - Centro Histórico',
+    'Zona 2 - Linda Vista',
+    'Zona 3 - Ciudad del Sol',
+    'Zona 4 - Santa Clara',
+    'Zona 5 - El Frutal',
+    'Zona 6 - Mártires del Pueblo',
+    'Zona 10 - Ciudad Real',
+    'Zona 12 - San José Villa Nueva',
+    'Bárcena & Naciones Unidas',
+  ],
+  'San Miguel Petapa': [
+    'Petapa - Centro & Plaza Mayor',
+    'Petapa - Villa Hermosa I y II',
+    'Petapa - Los Álamos & El Frutal',
+    'Petapa - Prados de Villa Hermosa',
+    'Petapa - Santa Inés Petapa',
+    'Petapa - Ribera del Lago',
+  ],
+  'Villa Canales': [
+    'Villa Canales - Centro & Plaza',
+    'Villa Canales - Boca del Monte',
+    'Villa Canales - Santa Elena Barillas',
+    'Villa Canales - El Jocotillo',
+    'Villa Canales - Colmenas & Chichimecas',
+  ]
+};
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   searchQuery,
   onSearchChange,
+  selectedMunicipio,
+  onMunicipioChange,
   selectedZona,
   onZonaChange,
+  quickFilter,
+  onQuickFilterChange,
   onOpenCalendar,
   onOpenPropose,
   onScrollToEvents,
@@ -63,42 +88,46 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   const heroPhotos = [
     {
-      title: 'Festival del Chuchito & Tradición',
+      title: 'Festival del Chuchito y Sabor',
       subtitle: 'Plaza Central de Villa Nueva · Gastronomía tradicional',
+      municipio: 'Villa Nueva',
       image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=85',
-      tag: 'Evento Municipal Oficial',
-      badgeColor: 'bg-[#00F0FF]',
-      isRadar: false,
+      tag: 'Alcaldía Villa Nueva',
+      badgeColor: 'bg-[#FFE600] text-black',
       mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5262,-90.5878'
     },
     {
-      title: 'Radar Fest: Food Trucks & Música en Vivo',
-      subtitle: 'Explanada El Frutal · Producción Privada Radar',
-      image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?auto=format&fit=crop&w=1200&q=85',
-      tag: 'Evento Exclusivo Radar',
+      title: 'Festival del Mango y Tradición Petapa',
+      subtitle: 'Parque Central de San Miguel Petapa · Artesanías y Dulces',
+      municipio: 'San Miguel Petapa',
+      image: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=1200&q=85',
+      tag: 'Alcaldía San Miguel Petapa',
+      badgeColor: 'bg-[#00F0FF] text-black',
+      mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5028,-90.5611'
+    },
+    {
+      title: 'Gran Feria de la Piña Canaleña',
+      subtitle: 'Plaza Mayor de Villa Canales · Tradición y Postres',
+      municipio: 'Villa Canales',
+      image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=85',
+      tag: 'Alcaldía Villa Canales',
+      badgeColor: 'bg-[#CCFF00] text-black',
+      mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.4828,-90.5333'
+    },
+    {
+      title: 'Gran Bicitour y Circuito Intermunicipal',
+      subtitle: 'Conexión El Frutal · Villa Nueva · Petapa · Villa Canales',
+      municipio: 'Intermunicipal',
+      image: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=1200&q=85',
+      tag: '★ Exclusivo Radar Sur',
       badgeColor: 'bg-[#FF007F] text-white',
-      isRadar: true,
-      mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5120,-90.5720'
-    },
-    {
-      title: 'Cine Bajo las Estrellas & Pícnic',
-      subtitle: 'Parque Naciones Unidas · Mirador hacia el Lago',
-      image: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=85',
-      tag: 'Comunitario & Familiar',
-      badgeColor: 'bg-[#FFE600]',
-      isRadar: false,
-      mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.4842,-90.5985'
-    },
-    {
-      title: 'Bazar Nocturno & Rock Acústico Radar',
-      subtitle: 'Terraza Santa Clara · Emprendedores locales',
-      image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=85',
-      tag: 'Evento Exclusivo Radar',
-      badgeColor: 'bg-[#CCFF00]',
-      isRadar: true,
-      mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5380,-90.5725'
+      mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5110,-90.5650'
     },
   ];
+
+  const availableZonas = selectedMunicipio === 'all'
+    ? Object.values(ZONAS_BY_MUNICIPIO).flat()
+    : ZONAS_BY_MUNICIPIO[selectedMunicipio as MunicipioSur] || [];
 
   return (
     <div id="inicio" className="relative overflow-hidden bg-[#FFFDF0] bg-grid-90s pt-8 pb-14 sm:pb-20 border-b-4 border-black">
@@ -112,38 +141,38 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Main 90s Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
-          {/* Left Column: 90s Bold Narrative */}
+          {/* Left Column: Bold Narrative for the 3 Municipalities */}
           <div className="lg:col-span-7 space-y-6">
             
             {/* Top Badge Row */}
             <div className="flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black rotate-[-1deg]">
                 <DragonRadarLogo size="sm" />
-                <span>RADAR</span>
+                <span>RADAR SUR</span>
               </div>
-              <span className="px-2.5 py-1 bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s rotate-[2deg] flex items-center gap-1">
-                <Zap className="w-3.5 h-3.5" /> 100% RADICAL
+              <span className="px-2.5 py-1 bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s rotate-[1deg] flex items-center gap-1">
+                <Zap className="w-3.5 h-3.5" /> 3 MUNICIPIOS UNIDOS
               </span>
-              <span className="px-2 py-1 bg-[#00F0FF] text-black border-2 border-black shadow-[3px_3px_0_#000] text-xs font-bold">
-                12 ZONAS
+              <span className="px-2.5 py-1 bg-[#00F0FF] text-black border-2 border-black shadow-[3px_3px_0_#000] text-xs font-black">
+                VN · PETAPA · CANALES
               </span>
             </div>
 
-            {/* Main Headline with 90s Pop Punch */}
+            {/* Main Headline */}
             <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-90s text-black leading-[1.08] tracking-tight uppercase">
               ¡Detección Total de Eventos en{' '}
               <span className="bg-[#FFE600] px-2 border-3 border-black shadow-[3px_3px_0_#000] sm:shadow-[4px_4px_0_#000] inline-block mt-1">
-                Villa Nueva
+                El Sur
               </span>!
             </h1>
 
-            {/* Clear Explanation with 90s styling */}
+            {/* Clear Explanation */}
             <div className="p-3.5 sm:p-4 bg-white border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] space-y-2">
               <p className="text-xs sm:text-base text-black font-medium leading-relaxed">
-                Plataforma privada e independiente que escanea y reúne tanto las <strong className="bg-[#00F0FF] px-1 border border-black">actividades municipales oficiales</strong> como los <strong className="bg-[#FF007F] text-white px-1 border border-black">eventos exclusivos organizados por Radar</strong>.
+                Plataforma cívica y comercial que une la agenda de las alcaldías de <strong className="bg-[#FFE600] px-1 border border-black">Villa Nueva</strong>, <strong className="bg-[#00F0FF] px-1 border border-black">San Miguel Petapa</strong> y <strong className="bg-[#CCFF00] px-1 border border-black">Villa Canales</strong>, junto a <strong className="bg-[#FF007F] text-white px-1 border border-black">eventos y bazares de Radar Sur</strong>.
               </p>
               <p className="text-[11px] sm:text-sm text-black/80 font-bold flex items-center gap-2 pt-1 border-t-2 border-black/10">
-                <span className="text-[#FF007F]">★</span> Explora fotos reales, abre rutas en Google Maps y Waze, y suma tu emprendimiento al bazar.
+                <span className="text-[#FF007F]">★</span> Rutas directas con Google Maps y Waze, cupones QR para emprendedores y operativos viales coordinados.
               </p>
             </div>
 
@@ -154,7 +183,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#FFE600] hover:bg-[#FF007F] hover:text-white border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Radio className="w-4 h-4" />
-                <span>EXPLORAR EVENTOS</span>
+                <span>DESCUBRIR PLANES DEL SUR</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -165,6 +194,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <Sparkles className="w-4 h-4" />
                 <span>PROPONER ACTIVIDAD</span>
               </button>
+
               <button
                 onClick={onOpenCalendar}
                 className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#CCFF00] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
@@ -178,7 +208,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-[#FFE600] hover:text-black border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Store className="w-4 h-4" />
-                <span>ADS EMPRENDEDORES</span>
+                <span>CUPONES & ADS</span>
               </a>
             </div>
 
@@ -186,7 +216,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-black">
               <span className="bg-white px-3 py-1 border-2 border-black shadow-[2px_2px_0_#000] flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-[#00F0FF]" />
-                <span>12 Zonas Cubiertas</span>
+                <span>3 Municipios Aliados</span>
               </span>
               <span className="bg-white px-3 py-1 border-2 border-black shadow-[2px_2px_0_#000] flex items-center gap-1.5">
                 <Flame className="w-4 h-4 text-[#FF007F]" />
@@ -210,7 +240,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <span className="w-3 h-3 rounded-full bg-[#00F0FF] border border-black" />
                   <span className="w-3 h-3 rounded-full bg-[#CCFF00] border border-black" />
                   <span className="text-[11px] font-90s text-black uppercase tracking-wider ml-1">
-                    CANAL RADAR
+                    SEÑAL RADAR SUR
                   </span>
                 </div>
                 <span className="text-[10px] font-mono font-black bg-black text-[#FFE600] px-1.5 py-0.5">
@@ -229,9 +259,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent pointer-events-none" />
 
                 {/* Tag Badge */}
-                <div className="absolute top-3 left-3 z-10">
+                <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 flex-wrap">
                   <span className={`px-2.5 py-1 text-[11px] font-90s uppercase border-2 border-black shadow-[3px_3px_0_#000] ${heroPhotos[activePhotoIdx].badgeColor}`}>
                     {heroPhotos[activePhotoIdx].tag}
+                  </span>
+                  <span className="px-2 py-1 text-[10px] font-90s uppercase bg-black text-[#FFE600] border border-white shadow-[2px_2px_0_#000]">
+                    {heroPhotos[activePhotoIdx].municipio}
                   </span>
                 </div>
 
@@ -286,17 +319,50 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
 
-        {/* 90s Neo-Brutalist Search Bar */}
-        <div className="mt-10 sm:mt-14 bg-[#FFE600] border-4 border-black p-4 sm:p-5 shadow-[8px_8px_0_#000]">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="px-2 py-0.5 bg-[#FF007F] text-white font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000]">
-              ★ SCANNER
-            </span>
-            <span className="text-xs font-black text-black">
-              Filtra actividades en segundos por palabra clave o zona
-            </span>
+        {/* 90s Neo-Brutalist Intermunicipal Scanner Bar */}
+        <div className="mt-10 sm:mt-14 bg-[#FFE600] border-4 border-black p-4 sm:p-5 shadow-[8px_8px_0_#000] space-y-4">
+          
+          {/* Header row with Scanner Badge & Municipality Switcher Pills */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b-2 border-black">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-[#FF007F] text-white font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000]">
+                ★ SCANNER SUR
+              </span>
+              <span className="text-xs font-black text-black">
+                Selecciona tu Municipio o explora todo el Sur:
+              </span>
+            </div>
+
+            {/* Quick Municipality Filter Tabs */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {[
+                { id: 'all', label: '★ TODO EL SUR', color: 'bg-black text-[#FFE600]' },
+                { id: 'Villa Nueva', label: 'VILLA NUEVA', color: 'bg-[#00F0FF] text-black' },
+                { id: 'San Miguel Petapa', label: 'SAN MIGUEL PETAPA', color: 'bg-[#FF007F] text-white' },
+                { id: 'Villa Canales', label: 'VILLA CANALES', color: 'bg-[#CCFF00] text-black' },
+              ].map((muni) => {
+                const isActive = selectedMunicipio === muni.id;
+                return (
+                  <button
+                    key={muni.id}
+                    onClick={() => {
+                      onMunicipioChange(muni.id);
+                      onZonaChange('all');
+                    }}
+                    className={`px-3 py-1 text-xs font-90s border-2 border-black transition-all cursor-pointer ${
+                      isActive 
+                        ? `${muni.color} shadow-[3px_3px_0_#000] -translate-y-0.5` 
+                        : 'bg-white text-black hover:bg-slate-100 shadow-[1.5px_1.5px_0_#000]'
+                    }`}
+                  >
+                    {muni.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
+          {/* Search Input, Zone dropdown & Action buttons */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
             
             {/* Search Input */}
@@ -306,12 +372,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Buscar comida, música, feria, deporte o lugar..."
+                placeholder="Buscar chuchito, mango, piña, ciclovía o lugar..."
                 className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-white border-3 border-black text-black font-bold placeholder-black/50 focus:outline-none focus:bg-[#FFFDF0] shadow-[3px_3px_0_#000]"
               />
             </div>
 
-            {/* Zona Dropdown */}
+            {/* Zona Dropdown (filtered according to selected municipality) */}
             <div className="md:col-span-4 relative">
               <MapPin className="w-4 h-4 text-[#FF007F] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <select
@@ -319,8 +385,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 onChange={(e) => onZonaChange(e.target.value)}
                 className="w-full pl-10 pr-8 py-2.5 text-xs sm:text-sm bg-white border-3 border-black text-black font-black appearance-none cursor-pointer shadow-[3px_3px_0_#000] focus:outline-none"
               >
-                <option value="all">Todas las Zonas de Villa Nueva</option>
-                {ZONAS_LIST.map((zona) => (
+                <option value="all">
+                  {selectedMunicipio === 'all' ? 'Todas las Zonas (VN · Petapa · Canales)' : `Todas las Zonas de ${selectedMunicipio}`}
+                </option>
+                {availableZonas.map((zona) => (
                   <option key={zona} value={zona}>
                     {zona}
                   </option>
@@ -332,7 +400,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="md:col-span-3 flex items-center justify-between md:justify-end gap-2">
               <button
                 onClick={onOpenCalendar}
-                className="flex-1 md:flex-none px-4 py-2.5 text-xs font-90s text-black bg-[#00F0FF] hover:bg-white border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5 shrink-0"
+                className="flex-1 md:flex-none px-4 py-2.5 text-xs font-90s text-black bg-[#00F0FF] hover:bg-white border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
               >
                 <Calendar className="w-3.5 h-3.5" />
                 <span>CALENDARIO</span>
@@ -343,10 +411,40 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 className="flex-1 md:flex-none px-4 py-2.5 text-xs font-90s text-white bg-[#FF007F] hover:bg-black border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5 shrink-0"
               >
                 <Store className="w-3.5 h-3.5" />
-                <span>UNIRSE</span>
+                <span>CUPONES</span>
               </a>
             </div>
           </div>
+
+          {/* Quick Moment Filter Pills (Today, Weekend, Free) */}
+          <div className="flex items-center gap-2 pt-2 border-t border-black/20 flex-wrap">
+            <span className="text-[11px] font-90s uppercase text-black mr-1 flex items-center gap-1">
+              <Flame className="w-3.5 h-3.5 text-[#FF007F]" /> FILTRADO RÁPIDO:
+            </span>
+            {[
+              { id: 'all', label: 'TODAS LAS FECHAS' },
+              { id: 'weekend', label: '🔥 ESTE FIN DE SEMANA' },
+              { id: 'free', label: '🎟️ 100% GRATIS' },
+              { id: 'sports', label: '🚲 DEPORTES & CICLOVÍAS' },
+              { id: 'gastro', label: '🌮 GASTRONOMÍA & FERIAS' }
+            ].map((filt) => {
+              const isActive = quickFilter === filt.id;
+              return (
+                <button
+                  key={filt.id}
+                  onClick={() => onQuickFilterChange(filt.id)}
+                  className={`px-2.5 py-1 text-[11px] font-90s border-2 border-black transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-black text-[#FFE600] shadow-[2px_2px_0_#000]'
+                      : 'bg-white text-black hover:bg-white/80 shadow-[1px_1px_0_#000]'
+                  }`}
+                >
+                  {filt.label}
+                </button>
+              );
+            })}
+          </div>
+
         </div>
 
       </div>

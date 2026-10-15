@@ -7,7 +7,10 @@ export type EventCategory =
   | 'Ferias y Mercados'
   | 'Ecológico';
 
-export type VillaNuevaZona =
+export type MunicipioSur = 'Villa Nueva' | 'San Miguel Petapa' | 'Villa Canales';
+
+export type SurZona =
+  // Villa Nueva
   | 'Zona 1 - Centro Histórico'
   | 'Zona 2 - Linda Vista'
   | 'Zona 3 - Ciudad del Sol'
@@ -16,13 +19,30 @@ export type VillaNuevaZona =
   | 'Zona 6 - Mártires del Pueblo'
   | 'Zona 10 - Ciudad Real'
   | 'Zona 12 - San José Villa Nueva'
-  | 'Bárcena & Naciones Unidas';
+  | 'Bárcena & Naciones Unidas'
+  // San Miguel Petapa
+  | 'Petapa - Centro & Plaza Mayor'
+  | 'Petapa - Villa Hermosa I y II'
+  | 'Petapa - Los Álamos & El Frutal'
+  | 'Petapa - Prados de Villa Hermosa'
+  | 'Petapa - Santa Inés Petapa'
+  | 'Petapa - Ribera del Lago'
+  // Villa Canales
+  | 'Villa Canales - Centro & Plaza'
+  | 'Villa Canales - Boca del Monte'
+  | 'Villa Canales - Santa Elena Barillas'
+  | 'Villa Canales - El Jocotillo'
+  | 'Villa Canales - Colmenas & Chichimecas';
+
+// Backward compatibility alias
+export type VillaNuevaZona = SurZona | string;
 
 export interface EventItem {
   id: string;
   slug?: string;
   title: string;
   category: EventCategory;
+  municipio: MunicipioSur;
   date: string; // YYYY-MM-DD
   time: string;
   locationName: string;
@@ -37,7 +57,7 @@ export interface EventItem {
     name: string;
     role: string;
     verified: boolean;
-    type: 'Radar Villa Nueva (Exclusivo)' | 'Alcaldía Villa Nueva' | 'Colectivo Vecinal' | 'Comité Comunitario' | 'Club Deportivo';
+    type: 'Radar Sur (Exclusivo)' | 'Radar Villa Nueva (Exclusivo)' | 'Alcaldía Villa Nueva' | 'Alcaldía San Miguel Petapa' | 'Alcaldía Villa Canales' | 'Colectivo Vecinal' | 'Comité Comunitario' | 'Club Deportivo';
   };
   sourceType?: 'radar' | 'municipal'; // Private Radar event vs Municipal alliance event
   targetAudience: string;
@@ -73,6 +93,7 @@ export type AdSpaceType =
   | 'Espacio Food Truck / Remolque'
   | 'Patrocinio Oficial de Evento (Lonas & Escenario)'
   | 'Degustación & Muestreo de Producto'
+  | 'Anuncio Digital en Radar Sur'
   | 'Anuncio Digital en Radar Villa Nueva';
 
 export interface EntrepreneurAd {
@@ -80,6 +101,7 @@ export interface EntrepreneurAd {
   businessName: string;
   ownerName: string;
   category: EntrepreneurCategory;
+  municipio?: MunicipioSur;
   phone: string;
   email: string;
   instagramUrl?: string;
@@ -97,6 +119,9 @@ export interface EntrepreneurAd {
   createdAt: string;
   budget?: string;
   verifiedBadge?: boolean;
+  couponCode?: string;
+  discountPercentage?: number;
+  couponsLeft?: number;
 }
 
 export interface ForumReply {
@@ -138,6 +163,7 @@ export interface UserProfile {
   name: string;
   email: string;
   role: 'vecino' | 'organizador' | 'admin';
+  municipio?: MunicipioSur;
   zona: VillaNuevaZona;
   avatar: string;
   savedEvents: string[];

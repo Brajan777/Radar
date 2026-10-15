@@ -28,8 +28,9 @@ import {
   Image as ImageIcon,
   CheckCircle2
 } from 'lucide-react';
-import { EventItem, UserProfile, EventCategory, VillaNuevaZona, EntrepreneurAd, AdSpaceType } from '../types';
+import { EventItem, UserProfile, EventCategory, SurZona, MunicipioSur, EntrepreneurAd, AdSpaceType } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
+import { ZONAS_BY_MUNICIPIO } from './HeroSection';
 
 interface AdminPanelProps {
   events: EventItem[];
@@ -50,18 +51,6 @@ const CATEGORIES: EventCategory[] = [
   'Juventud y Arte',
   'Ferias y Mercados',
   'Ecológico',
-];
-
-const ZONAS_LIST: VillaNuevaZona[] = [
-  'Zona 1 - Centro Histórico',
-  'Zona 2 - Linda Vista',
-  'Zona 3 - Ciudad del Sol',
-  'Zona 4 - Santa Clara',
-  'Zona 5 - El Frutal',
-  'Zona 6 - Mártires del Pueblo',
-  'Zona 10 - Ciudad Real',
-  'Zona 12 - San José Villa Nueva',
-  'Bárcena & Naciones Unidas',
 ];
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -258,11 +247,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         <div className="bg-white border-4 border-black p-5 sm:p-6 shadow-[6px_6px_0_#000] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-base font-bold text-blue-950 font-serif-display">
-                Listado de Eventos en Villa Nueva ({events.length})
+              <h3 className="text-base font-90s text-black uppercase">
+                Listado de Eventos Radar Sur ({events.length})
               </h3>
-              <p className="text-xs text-slate-500">
-                Los eventos creados aquí se publican en el radar y son visibles para toda la ciudadanía.
+              <p className="text-xs text-black font-bold">
+                Actividades activas en Villa Nueva, San Miguel Petapa y Villa Canales visibles en la web pública.
               </p>
             </div>
 
@@ -270,29 +259,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               onClick={() => {
                 const freshEvent: EventItem = {
                   id: `ev-adm-${Date.now()}`,
-                  title: 'Nuevo Evento Radar',
+                  title: 'Nuevo Evento Radar Sur',
                   category: 'Familiar',
+                  municipio: 'Villa Nueva',
                   zona: 'Zona 1 - Centro Histórico',
                   date: '2026-11-15',
                   time: '10:00 AM - 04:00 PM',
                   locationName: 'Parque Central de Villa Nueva',
                   coordinates: { lat: 14.5262, lng: -90.5878 },
-                  description: 'Descripción completa del evento para las familias y vecinos...',
-                  shortSummary: 'Actividad familiar para disfrutar el fin de semana en Villa Nueva.',
+                  description: 'Descripción completa del evento para las familias y vecinos del sur...',
+                  shortSummary: 'Actividad familiar para disfrutar el fin de semana en el sur metropolitano.',
                   organizer: {
-                    name: 'Radar Villa Nueva (Producción)',
+                    name: 'Radar Sur (Producción)',
                     role: 'Organizador Oficial',
                     verified: true,
-                    type: 'Radar Villa Nueva (Exclusivo)',
+                    type: 'Radar Sur (Exclusivo)',
                   },
                   sourceType: 'radar',
-                  targetAudience: 'Familias y Vecinos de Villa Nueva',
+                  targetAudience: 'Familias y Vecinos de Villa Nueva, Petapa y Villa Canales',
                   cost: 'Entrada Gratis',
                   capacity: 1000,
                   rsvpCount: 0,
                   isFeatured: true,
                   status: 'Aprobado',
-                  tags: ['Familiar', 'Radar Villa Nueva', 'Música'],
+                  tags: ['Familiar', 'RadarSur', 'Música'],
                   amenities: ['Seguridad PMT', 'Parqueo Guiado', 'Stands Emprendedores'],
                   gradientTheme: 'from-blue-900 via-indigo-800 to-red-600',
                   accentColor: '#dc2626',
@@ -310,47 +300,50 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 setEditingEvent(freshEvent);
                 showStatus('Nuevo evento creado. Modifica los campos a continuación.');
               }}
-              className="px-4 py-2.5 text-xs font-black text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all flex items-center gap-1.5 shadow-md self-start sm:self-auto"
+              className="px-4 py-2.5 text-xs font-90s text-white bg-[#FF007F] hover:bg-black border-2 border-black shadow-[3px_3px_0_#000] transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>+ Crear Nuevo Evento</span>
+              <span>+ CREAR NUEVO EVENTO</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700 min-w-[700px]">
-              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider text-[10px] font-bold">
+            <table className="w-full text-left text-xs text-black min-w-[700px] border-2 border-black">
+              <thead className="bg-[#FFE600] text-black uppercase tracking-wider text-[10px] font-90s border-b-2 border-black">
                 <tr>
                   <th className="p-3">Tipo & Título</th>
-                  <th className="p-3">Zona</th>
+                  <th className="p-3">Municipio & Sector</th>
                   <th className="p-3">Fecha y Hora</th>
                   <th className="p-3">Aforo / Pases</th>
                   <th className="p-3">Destacado</th>
                   <th className="p-3 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-black/20">
                 {events.map((ev) => {
-                  const isRadar = ev.sourceType === 'radar' || ev.organizer.type === 'Radar Villa Nueva (Exclusivo)';
+                  const isRadar = ev.sourceType === 'radar' || ev.organizer.type?.includes('Radar');
                   return (
-                    <tr key={ev.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={ev.id} className="hover:bg-[#FFFDF0] transition-colors">
                       <td className="p-3">
                         <div className="flex items-center gap-1.5 mb-1">
                           {isRadar ? (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-red-100 text-red-700 border border-red-300">
-                              ⚡ Radar Exclusivo
+                            <span className="px-2 py-0.5 text-[9px] font-90s uppercase bg-[#FF007F] text-white border border-black shadow-[1px_1px_0_#000]">
+                              ⚡ Radar Sur Exclusivo
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-200">
+                            <span className="px-2 py-0.5 text-[9px] font-90s uppercase bg-[#00F0FF] text-black border border-black shadow-[1px_1px_0_#000]">
                               🏛️ Municipal
                             </span>
                           )}
-                          <span className="text-[10px] text-slate-500">{ev.category}</span>
+                          <span className="text-[10px] text-black font-bold">({ev.category})</span>
                         </div>
-                        <span className="font-bold text-slate-900 block text-sm">{ev.title}</span>
-                        <span className="text-[11px] text-slate-500">{ev.locationName}</span>
+                        <span className="font-bold text-black block text-sm">{ev.title}</span>
+                        <span className="text-[11px] text-slate-600 font-medium">{ev.locationName}</span>
                       </td>
-                      <td className="p-3 whitespace-nowrap font-medium text-slate-700">{ev.zona.split(' - ')[0]}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        <span className="font-90s text-black text-xs block">{ev.municipio || 'Villa Nueva'}</span>
+                        <span className="text-[11px] text-slate-600 font-bold">{ev.zona.split(' - ')[0]}</span>
+                      </td>
                       <td className="p-3 whitespace-nowrap">
                         <span className="font-semibold text-slate-900">{ev.date}</span>
                         <span className="text-slate-400 block text-[10px]">{ev.time}</span>
@@ -643,29 +636,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
 
             <form onSubmit={handleSaveEditedEvent} className="p-5 sm:p-6 space-y-4 overflow-y-auto text-xs flex-1">
-              {/* Event Type: Radar Exclusivo vs Municipal */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-blue-50/70 rounded-2xl border border-blue-200">
+              {/* Event Type: Radar Sur Exclusivo vs Municipal */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[#FFE600]/20 rounded-2xl border-2 border-black shadow-[2px_2px_0_#000]">
                 <div>
-                  <label className="font-bold text-blue-950 block mb-1">Tipo de Actividad:</label>
+                  <label className="font-90s text-black block mb-1 uppercase">Tipo de Actividad:</label>
                   <select
                     value={editingEvent.sourceType || 'radar'}
-                    onChange={(e) => setEditingEvent({ 
-                      ...editingEvent, 
-                      sourceType: e.target.value as any,
-                      organizer: {
-                        ...editingEvent.organizer,
-                        type: e.target.value === 'radar' ? 'Radar Villa Nueva (Exclusivo)' : 'Alcaldía Villa Nueva'
-                      }
-                    })}
-                    className="w-full px-3 py-2 bg-white border border-blue-300 rounded-xl text-blue-950 font-bold"
+                    onChange={(e) => {
+                      const isRadar = e.target.value === 'radar';
+                      const muni = editingEvent.municipio || 'Villa Nueva';
+                      setEditingEvent({ 
+                        ...editingEvent, 
+                        sourceType: e.target.value as any,
+                        organizer: {
+                          ...editingEvent.organizer,
+                          type: isRadar ? 'Radar Sur (Exclusivo)' : `Alcaldía ${muni}`
+                        }
+                      });
+                    }}
+                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg text-black font-bold"
                   >
-                    <option value="radar">⚡ Evento Exclusivo Radar Villa Nueva</option>
+                    <option value="radar">⚡ Evento Exclusivo Radar Sur</option>
                     <option value="municipal">🏛️ Evento Municipal Oficial</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="font-bold text-blue-950 block mb-1">Entidad Organizadora:</label>
+                  <label className="font-90s text-black block mb-1 uppercase">Entidad Organizadora:</label>
                   <input
                     type="text"
                     value={editingEvent.organizer.name}
@@ -673,44 +670,74 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       ...editingEvent,
                       organizer: { ...editingEvent.organizer, name: e.target.value }
                     })}
-                    className="w-full px-3 py-2 bg-white border border-blue-300 rounded-xl text-slate-800"
+                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg text-black font-bold"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Título del Evento:</label>
+                <label className="font-90s text-black block mb-1 uppercase">Título del Evento:</label>
                 <input
                   type="text"
                   required
                   value={editingEvent.title}
                   onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-semibold focus:outline-none focus:border-blue-600"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border-2 border-black rounded-lg text-black font-bold focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* 3-way Geographic & Classification Control */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Categoría:</label>
+                  <label className="font-90s text-black block mb-1 uppercase">Municipio:</label>
                   <select
-                    value={editingEvent.category}
-                    onChange={(e) => setEditingEvent({ ...editingEvent, category: e.target.value as EventCategory })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800"
+                    value={editingEvent.municipio || 'Villa Nueva'}
+                    onChange={(e) => {
+                      const newMuni = e.target.value as MunicipioSur;
+                      const defaultZona = ZONAS_BY_MUNICIPIO[newMuni]?.[0] || editingEvent.zona;
+                      const updatedType = editingEvent.sourceType === 'municipal' 
+                        ? `Alcaldía ${newMuni}` 
+                        : editingEvent.organizer.type;
+                      setEditingEvent({
+                        ...editingEvent,
+                        municipio: newMuni,
+                        zona: defaultZona as SurZona,
+                        organizer: {
+                          ...editingEvent.organizer,
+                          type: updatedType
+                        }
+                      });
+                    }}
+                    className="w-full px-3 py-2 bg-[#FFE600] border-2 border-black rounded-lg text-black font-90s"
                   >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                    <option value="Villa Nueva">Villa Nueva</option>
+                    <option value="San Miguel Petapa">San Miguel Petapa</option>
+                    <option value="Villa Canales">Villa Canales</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-90s text-black block mb-1 uppercase">Zona / Sector:</label>
+                  <select
+                    value={editingEvent.zona}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, zona: e.target.value as SurZona })}
+                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg text-black font-bold"
+                  >
+                    {(ZONAS_BY_MUNICIPIO[editingEvent.municipio || 'Villa Nueva'] || []).map((z) => (
+                      <option key={z} value={z}>{z}</option>
                     ))}
                   </select>
                 </div>
+
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Zona:</label>
+                  <label className="font-90s text-black block mb-1 uppercase">Categoría:</label>
                   <select
-                    value={editingEvent.zona}
-                    onChange={(e) => setEditingEvent({ ...editingEvent, zona: e.target.value as VillaNuevaZona })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800"
+                    value={editingEvent.category}
+                    onChange={(e) => setEditingEvent({ ...editingEvent, category: e.target.value as EventCategory })}
+                    className="w-full px-3 py-2 bg-white border-2 border-black rounded-lg text-black font-bold"
                   >
-                    {ZONAS_LIST.map((z) => (
-                      <option key={z} value={z}>{z}</option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                 </div>

@@ -1,10 +1,12 @@
 import { EventItem, ForumPost, UserProfile, AiSubagent, PlatformMetrics, EntrepreneurAd } from '../types';
 
 export const INITIAL_EVENTS: EventItem[] = [
+  // --- VILLA NUEVA ---
   {
     id: 'ev-vn-01',
     title: 'Festival del Chuchito y Sabor Villanovano',
     category: 'Gastronómico',
+    municipio: 'Villa Nueva',
     date: '2026-10-18',
     time: '09:00 AM - 05:00 PM',
     locationName: 'Plaza Mayor y Parque Central de Villa Nueva',
@@ -25,8 +27,8 @@ export const INITIAL_EVENTS: EventItem[] = [
     rsvpCount: 840,
     isFeatured: true,
     status: 'Destacado',
-    tags: ['Gastronomía', 'Tradición', 'Marimba', 'Familiar'],
-    amenities: ['Parqueo Municipal Guiado', 'Seguridad PMT', 'Área Techada', 'Puntos Limpios'],
+    tags: ['Gastronomía', 'Tradición', 'Marimba', 'Familiar', 'Villa Nueva'],
+    amenities: ['Parqueo Municipal Guiado', 'Seguridad PMT VN', 'Área Techada', 'Puntos Limpios'],
     gradientTheme: 'from-blue-600 via-indigo-700 to-red-600',
     accentColor: '#dc2626',
     iconName: 'UtensilsCrossed',
@@ -39,12 +41,13 @@ export const INITIAL_EVENTS: EventItem[] = [
     ],
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5262,-90.5878',
     wazeUrl: 'https://waze.com/ul?ll=14.5262,-90.5878&navigate=yes',
-    howToGetThere: 'Desde CA-9 Sur ingresa por la 3a calle hacia el Parque Central de Villa Nueva. Habrá parqueo señalizado por PMT frente al edificio municipal.'
+    howToGetThere: 'Desde CA-9 Sur ingresa por la 3a calle hacia el Parque Central de Villa Nueva. Habrá parqueo señalizado por PMT Villa Nueva frente al palacio municipal.'
   },
   {
     id: 'ev-vn-02',
     title: 'Ciclovía Nocturna y Roller Fest El Frutal',
     category: 'Deportivo',
+    municipio: 'Villa Nueva',
     date: '2026-10-21',
     time: '06:30 PM - 10:00 PM',
     locationName: 'Bulevar El Frutal, frente a Plaza El Frutal',
@@ -53,7 +56,7 @@ export const INITIAL_EVENTS: EventItem[] = [
     description: 'Circuito cerrado y seguro de 4.5 km para bicicletas, patines y caminata nocturna. Estaciones de hidratación, zumba familiar en tarima, luces led neón y préstamo gratuito de bicicletas para infantes.',
     shortSummary: 'Ruta recreativa nocturna para patines y bicis con zumba y música en vivo.',
     organizer: {
-      name: 'Colectivo Bici-Vecinos Villa Nueva',
+      name: 'Colectivo Bici-Vecinos Sur',
       role: 'Coordinador Deportivo',
       verified: true,
       type: 'Club Deportivo'
@@ -78,19 +81,20 @@ export const INITIAL_EVENTS: EventItem[] = [
     ],
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5098,-90.5694',
     wazeUrl: 'https://waze.com/ul?ll=14.5098,-90.5694&navigate=yes',
-    howToGetThere: 'Bulevar El Frutal Zona 5. Acceso directo desde San Miguel Petapa o Calzada Concepción. Carril cerrado con señalización reflectiva.'
+    howToGetThere: 'Bulevar El Frutal Zona 5. Conexión directa desde San Miguel Petapa o Calzada Concepción. Carril cerrado con señalización reflectiva.'
   },
   {
     id: 'ev-vn-03',
     title: 'Noche de Cine Bajo las Estrellas & Pícnic',
     category: 'Familiar',
+    municipio: 'Villa Nueva',
     date: '2026-10-24',
     time: '05:30 PM - 09:30 PM',
     locationName: 'Parque Nacional Naciones Unidas, Mirador hacia el Lago',
     zona: 'Bárcena & Naciones Unidas',
     coordinates: { lat: 14.4842, lng: -90.5985 },
-    description: 'Proyección en pantalla inflable gigante de película animada infantil de aventuras, zona de fogatas controladas con bombones, zona pet friendly y mirador panorámico. Trae tu petate o silla plegable.',
-    shortSummary: 'Cine al aire libre en el bosque con fogatas y vista hacia el Lago de Amatitlán.',
+    description: 'Proyección en pantalla inflable gigante de película animada infantil de aventuras, zona de fogatas controladas con bombones, zona pet friendly y mirador panorámico con vista hacia el Lago de Amatitlán.',
+    shortSummary: 'Cine al aire libre en el bosque con fogatas y vista hacia el Lago.',
     organizer: {
       name: 'Comité de Vecinos Unidos Bárcena',
       role: 'Organización Comunitaria',
@@ -112,8 +116,7 @@ export const INITIAL_EVENTS: EventItem[] = [
     galleryImages: [
       'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'
     ],
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.4842,-90.5985',
     wazeUrl: 'https://waze.com/ul?ll=14.4842,-90.5985&navigate=yes',
@@ -123,20 +126,21 @@ export const INITIAL_EVENTS: EventItem[] = [
     id: 'ev-vn-04',
     title: 'Batalla de Hip-Hop & Arte Mural en Santa Clara',
     category: 'Juventud y Arte',
+    municipio: 'Villa Nueva',
     date: '2026-10-25',
     time: '02:00 PM - 07:00 PM',
     locationName: 'Polideportivo Santa Clara, Canchas Techadas',
     zona: 'Zona 4 - Santa Clara',
     coordinates: { lat: 14.5360, lng: -90.5750 },
-    description: 'Encuentro juvenil urbano villanovano con exhibición de muralismo en paneles efímeros, torneo de freestyle con temática de paz comunitaria, talleres de breakdance para principiantes y feria de emprendimientos de ropa local.',
+    description: 'Encuentro juvenil urbano con exhibición de muralismo en paneles efímeros, torneo de freestyle con temática de paz comunitaria, talleres de breakdance para principiantes y feria de emprendimientos de ropa local.',
     shortSummary: 'Torneo de freestyle, muralismo en vivo y feria de diseñadores emergentes.',
     organizer: {
-      name: 'Colectivo Arte Callejero VN',
+      name: 'Colectivo Arte Callejero Sur',
       role: 'Gestor Cultural Juvenil',
       verified: true,
       type: 'Colectivo Vecinal'
     },
-    targetAudience: 'Jóvenes de 12 a 29 años y familias',
+    targetAudience: 'Jóvenes y Familias',
     cost: 'Gratis',
     capacity: 900,
     rsvpCount: 388,
@@ -150,153 +154,280 @@ export const INITIAL_EVENTS: EventItem[] = [
     imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85',
     galleryImages: [
       'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80'
     ],
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5360,-90.5750',
     wazeUrl: 'https://waze.com/ul?ll=14.5360,-90.5750&navigate=yes',
-    howToGetThere: 'Polideportivo Santa Clara Zona 4. A 300 metros de Centro Comercial Santa Clara. Estacionamiento disponible en canchas.'
+    howToGetThere: 'Polideportivo Santa Clara Zona 4. A 300 metros de Centro Comercial Santa Clara.'
+  },
+
+  // --- SAN MIGUEL PETAPA ---
+  {
+    id: 'ev-smp-01',
+    title: 'Festival del Mango y Sabor Petapense',
+    category: 'Gastronómico',
+    municipio: 'San Miguel Petapa',
+    date: '2026-10-22',
+    time: '10:00 AM - 06:00 PM',
+    locationName: 'Parque Central de San Miguel Petapa & Santa Inés',
+    zona: 'Petapa - Centro & Plaza Mayor',
+    coordinates: { lat: 14.5028, lng: -90.5611 },
+    description: 'Tradicional fiesta petapense celebrando la cosecha del mango con dulces artesanales, helados de mango con chamoy, música de marimba en vivo y stands de artesanos de Santa Inés Petapa y Villa Hermosa.',
+    shortSummary: 'Fiesta gastronómica del mango con marimba, postres típicos y artesanías de Petapa.',
+    organizer: {
+      name: 'Comisión de Cultura de San Miguel Petapa',
+      role: 'Gestión Municipal',
+      verified: true,
+      type: 'Alcaldía San Miguel Petapa'
+    },
+    sourceType: 'municipal',
+    targetAudience: 'Familias, Niños y Abuelitos',
+    cost: 'Entrada Libre',
+    capacity: 2200,
+    rsvpCount: 950,
+    isFeatured: true,
+    status: 'Destacado',
+    tags: ['Gastronomía', 'Mango Petapense', 'Marimba', 'Petapa', 'Familiar'],
+    amenities: ['Parqueo PMT Petapa', 'Puestos de Degustación', 'Tarima Cultural', 'Primeros Auxilios'],
+    gradientTheme: 'from-amber-500 via-orange-600 to-red-600',
+    accentColor: '#f59e0b',
+    iconName: 'UtensilsCrossed',
+    imageUrl: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=1200&q=85',
+    galleryImages: [
+      'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1509315811345-672d83ef2fbc?auto=format&fit=crop&w=800&q=80'
+    ],
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5028,-90.5611',
+    wazeUrl: 'https://waze.com/ul?ll=14.5028,-90.5611&navigate=yes',
+    howToGetThere: 'Desde Calzada Concepción o Bulevar Villa Hermosa toma la avenida principal hacia el Parque Central de San Miguel Petapa. Guías de la PMT Petapa en el ingreso.'
   },
   {
-    id: 'ev-vn-05',
-    title: 'Reforestación Comunitaria y Senderismo Verde',
-    category: 'Ecológico',
-    date: '2026-10-31',
-    time: '07:30 AM - 12:30 PM',
-    locationName: 'Reserva Forestal Cerro Alux / Límite San José',
-    zona: 'Zona 12 - San José Villa Nueva',
-    coordinates: { lat: 14.4990, lng: -90.6120 },
-    description: 'Jornada participativa para plantar 1,200 árboles de especies nativas (ciprés, pino y matilisguate). Incluye charla ecológica didáctica para infantes, entrega de kit de jardinería y refrigerio donado por empresas locales.',
-    shortSummary: 'Siembra de árboles nativos y caminata interpretativa en familia.',
+    id: 'ev-smp-02',
+    title: 'Copa de Fútbol 7 & Tarde Recreativa Los Álamos',
+    category: 'Deportivo',
+    municipio: 'San Miguel Petapa',
+    date: '2026-10-29',
+    time: '08:00 AM - 04:00 PM',
+    locationName: 'Complejo Deportivo Los Álamos, San Miguel Petapa',
+    zona: 'Petapa - Los Álamos & El Frutal',
+    coordinates: { lat: 14.5150, lng: -90.5550 },
+    description: 'Gran torneo relámpago interbarrial de fútbol 7 para categorías juvenil y libre. Inflables gigantes para niños, venta de antojitos típicos petapenses y animación musical comunitaria.',
+    shortSummary: 'Torneo de fútbol 7 en canchas sintéticas con música y comida familiar.',
     organizer: {
-      name: 'Red Ecológica de San José VN',
-      role: 'Voluntariado Ambiental',
+      name: 'Dirección de Deportes Petapa',
+      role: 'Coordinador Deportivo',
+      verified: true,
+      type: 'Alcaldía San Miguel Petapa'
+    },
+    sourceType: 'municipal',
+    targetAudience: 'Deportistas y Familias',
+    cost: 'Gratis',
+    capacity: 1500,
+    rsvpCount: 710,
+    isFeatured: false,
+    status: 'Aprobado',
+    tags: ['Fútbol', 'Deporte Familiar', 'Los Álamos', 'Petapa'],
+    amenities: ['Canchas Sintéticas', 'Graderíos Techados', 'Hidratación', 'Parqueo Vigilado'],
+    gradientTheme: 'from-emerald-600 via-teal-700 to-cyan-700',
+    accentColor: '#10b981',
+    iconName: 'Trophy',
+    imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=85',
+    galleryImages: [
+      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80'
+    ],
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5150,-90.5550',
+    wazeUrl: 'https://waze.com/ul?ll=14.5150,-90.5550&navigate=yes',
+    howToGetThere: 'Bulevar Los Álamos, a 4 minutos de Villa Hermosa y El Frutal. Parqueo municipal disponible.'
+  },
+  {
+    id: 'ev-smp-03',
+    title: 'Atardecer de Marimba & Pícnic en la Ribera del Lago',
+    category: 'Cultural',
+    municipio: 'San Miguel Petapa',
+    date: '2026-11-08',
+    time: '03:30 PM - 08:00 PM',
+    locationName: 'Malecón Turístico Playa Pública de Petapa',
+    zona: 'Petapa - Ribera del Lago',
+    coordinates: { lat: 14.4780, lng: -90.5680 },
+    description: 'Concierto al atardecer frente al Lago de Amatitlán con ensamble de marimbas petapenses, senderos iluminados, puestos de comida típica y área habilitada para pícnic familiar.',
+    shortSummary: 'Atardecer musical junto al lago con marimba orquesta y pícnic familiar.',
+    organizer: {
+      name: 'Colectivo Cultural Ribera Sur',
+      role: 'Promotor Comunitario',
       verified: true,
       type: 'Colectivo Vecinal'
     },
-    targetAudience: 'Todas las edades',
-    cost: 'Gratis con Registro',
-    capacity: 400,
-    rsvpCount: 295,
-    isFeatured: false,
-    status: 'Aprobado',
-    tags: ['Medio Ambiente', 'Voluntariado', 'Senderismo', 'Naturaleza'],
-    amenities: ['Herramientas Provistas', 'Guías Ambientales', 'Refrigerio', 'Primeros Auxilios'],
-    gradientTheme: 'from-blue-700 via-teal-600 to-red-600',
-    accentColor: '#16a34a',
-    iconName: 'Trees',
-    imageUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=85',
-    galleryImages: [
-      'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80'
-    ],
-    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.4990,-90.6120',
-    wazeUrl: 'https://waze.com/ul?ll=14.4990,-90.6120&navigate=yes',
-    howToGetThere: 'Punto de encuentro: Escuela Oficial Urbana de San José Villa Nueva. Salida en caravana guiada a las 07:15 AM.'
-  },
-  {
-    id: 'ev-vn-06',
-    title: 'Feria del Libro y Cuentacuentos en Linda Vista',
-    category: 'Cultural',
-    date: '2026-11-01',
-    time: '10:00 AM - 04:00 PM',
-    locationName: 'Salón Comunal Linda Vista, Parque Infantil',
-    zona: 'Zona 2 - Linda Vista',
-    coordinates: { lat: 14.5420, lng: -90.5810 },
-    description: 'Intercambio libre de libros, narración de leyendas guatemaltecas (El Sombrerón y La Llorona para niños) con títeres gigantes, taller de dibujo creativo y café artesanal para los padres.',
-    shortSummary: 'Lecturas animadas, títeres, trueque de libros y café de especialidad.',
-    organizer: {
-      name: 'Biblioteca Móvil Villanovana',
-      role: 'Promotora de Lectura',
-      verified: true,
-      type: 'Alcaldía Villa Nueva'
-    },
-    targetAudience: 'Bebés, Niños de 3 a 12 años y Padres',
+    sourceType: 'municipal',
+    targetAudience: 'Familias y Parejas',
     cost: 'Gratis',
-    capacity: 350,
-    rsvpCount: 180,
-    isFeatured: false,
-    status: 'Aprobado',
-    tags: ['Cultura', 'Lectura Infantil', 'Títeres', 'Café'],
-    amenities: ['Área Infantil Acolchada', 'Cafetería Vecinal', 'Mesas de Trabajo'],
-    gradientTheme: 'from-blue-600 via-sky-600 to-red-500',
-    accentColor: '#dc2626',
-    iconName: 'BookOpen',
-    imageUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=85',
+    capacity: 1100,
+    rsvpCount: 680,
+    isFeatured: true,
+    status: 'Destacado',
+    tags: ['Marimba', 'Lago', 'Atardecer', 'Música Tradicional', 'Petapa'],
+    amenities: ['Área de Petates y Sillas', 'Seguridad PMT Petapa', 'Venta de Café y Atoles', 'Sanitarios'],
+    gradientTheme: 'from-orange-600 via-rose-700 to-indigo-900',
+    accentColor: '#ea580c',
+    iconName: 'Sparkles',
+    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=85',
     galleryImages: [
-      'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1513475382585-d06e58bcb0d0?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'
     ],
-    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5420,-90.5810',
-    wazeUrl: 'https://waze.com/ul?ll=14.5420,-90.5810&navigate=yes',
-    howToGetThere: 'Salón Comunal Linda Vista Zona 2, frente a la Iglesia Católica. Accesible en transporte colectivo o vehículo particular.'
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.4780,-90.5680',
+    wazeUrl: 'https://waze.com/ul?ll=14.4780,-90.5680&navigate=yes',
+    howToGetThere: 'Carretera hacia la Playa Pública de San Miguel Petapa, desvío señalizado desde el centro de Petapa.'
+  },
+
+  // --- VILLA CANALES ---
+  {
+    id: 'ev-vc-01',
+    title: 'Gran Feria de la Piña & Dulces Típicos Canaleños',
+    category: 'Gastronómico',
+    municipio: 'Villa Canales',
+    date: '2026-10-25',
+    time: '09:00 AM - 06:00 PM',
+    locationName: 'Plaza Mayor y Parque Central de Villa Canales',
+    zona: 'Villa Canales - Centro & Plaza',
+    coordinates: { lat: 14.4828, lng: -90.5333 },
+    description: 'El evento gastronómico insignia de Villa Canales celebrando la producción de la piña más dulce de Guatemala: conservas, postres, jaleas, atol de piña, desfile de bandas y feria de emprendimientos agrícolas de la región.',
+    shortSummary: 'Feria patronal y gastronómica de la piña con música, desfiles y dulces tradicionales.',
+    organizer: {
+      name: 'Comité de Festejos Canaleños',
+      role: 'Gestión Cultural',
+      verified: true,
+      type: 'Alcaldía Villa Canales'
+    },
+    sourceType: 'municipal',
+    targetAudience: 'Toda la familia · Niños y Turistas',
+    cost: 'Entrada Gratis',
+    capacity: 3500,
+    rsvpCount: 1650,
+    isFeatured: true,
+    status: 'Destacado',
+    tags: ['Feria de la Piña', 'Gastronomía', 'Villa Canales', 'Tradición', 'Familiar'],
+    amenities: ['Parqueo Municipal Guiado', 'Seguridad PMT Villa Canales', 'Área Techada', 'Stands Agrícolas'],
+    gradientTheme: 'from-yellow-500 via-amber-600 to-red-600',
+    accentColor: '#eab308',
+    iconName: 'UtensilsCrossed',
+    imageUrl: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=1200&q=85',
+    galleryImages: [
+      'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80'
+    ],
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.4828,-90.5333',
+    wazeUrl: 'https://waze.com/ul?ll=14.4828,-90.5333&navigate=yes',
+    howToGetThere: 'Desde la Calzada Atanasio Tzul / VAS o Carretera a Villa Canales directo al Parque Central. Estacionamiento guiado por PMT Villa Canales.'
   },
   {
-    id: 'ev-vn-07',
-    title: 'Torneo Relámpago de Baloncesto 3x3 Ciudad Real',
-    category: 'Deportivo',
-    date: '2026-11-07',
-    time: '08:00 AM - 03:00 PM',
-    locationName: 'Canchas Municipales Ciudad Real II',
-    zona: 'Zona 10 - Ciudad Real',
-    coordinates: { lat: 14.5610, lng: -90.5615 },
-    description: 'Torneo comunitario en categorías Infantil, Juvenil y Libre Mixto. Premios para los primeros tres lugares, hidratación garantizada, arbitraje federado y animación con DJ comunitario.',
-    shortSummary: 'Competencia rápida de baloncesto en equipos de 3 con música y trofeos.',
+    id: 'ev-vc-02',
+    title: 'Festival de las Flores & Viento en Santa Elena Barillas',
+    category: 'Cultural',
+    municipio: 'Villa Canales',
+    date: '2026-11-01',
+    time: '08:00 AM - 05:00 PM',
+    locationName: 'Mirador Las Colinas, Santa Elena Barillas',
+    zona: 'Villa Canales - Santa Elena Barillas',
+    coordinates: { lat: 14.4510, lng: -90.4980 },
+    description: 'Exhibición y vuelo de barriletes gigantes tradicionales en la cumbre panorámica de Santa Elena Barillas con vista majestuosa hacia el Volcán de Pacaya y Lago de Amatitlán. Viveros de flores ornamentales y comida típica.',
+    shortSummary: 'Barriletes gigantes, mirador panorámico hacia el volcán y flores ornamentales.',
     organizer: {
-      name: 'Liga Barrial Ciudad Real',
-      role: 'Director de Torneo',
+      name: 'Alcaldía Auxiliar de Santa Elena Barillas',
+      role: 'Comité Organizador',
       verified: true,
-      type: 'Club Deportivo'
+      type: 'Alcaldía Villa Canales'
     },
-    targetAudience: 'Deportistas y familias espectadoras',
-    cost: 'Gratis inscripción',
-    capacity: 600,
-    rsvpCount: 310,
+    sourceType: 'municipal',
+    targetAudience: 'Familias, Fotógrafos y Aventureros',
+    cost: 'Gratis',
+    capacity: 1800,
+    rsvpCount: 890,
+    isFeatured: true,
+    status: 'Destacado',
+    tags: ['Barriletes', 'Mirador', 'Naturaleza', 'Flores', 'Villa Canales'],
+    amenities: ['Mirador Panorámico', 'Venta de Barriletes', 'Comida Típica', 'Seguridad PMT'],
+    gradientTheme: 'from-pink-600 via-rose-700 to-indigo-800',
+    accentColor: '#db2777',
+    iconName: 'Sparkles',
+    imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=85',
+    galleryImages: [
+      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=800&q=80'
+    ],
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.4510,-90.4980',
+    wazeUrl: 'https://waze.com/ul?ll=14.4510,-90.4980&navigate=yes',
+    howToGetThere: 'Subida hacia Santa Elena Barillas desde Villa Canales o Carretera a El Salvador (VAS). Parqueo sobre campo comunal.'
+  },
+  {
+    id: 'ev-vc-03',
+    title: 'Bazar Nocturno & Noche de Música Boca del Monte',
+    category: 'Ferias y Mercados',
+    municipio: 'Villa Canales',
+    date: '2026-11-05',
+    time: '05:00 PM - 10:30 PM',
+    locationName: 'Plaza Cívica de Boca del Monte, Bulevar Principal',
+    zona: 'Villa Canales - Boca del Monte',
+    coordinates: { lat: 14.5490, lng: -90.5180 },
+    description: 'Punto de encuentro comercial para más de 40 microempresarios y emprendedores de Boca del Monte. Comida callejera, ropa de diseño independiente, artesanías, música en vivo y resguardo de la PMT Villa Canales.',
+    shortSummary: 'Bazar comercial nocturno con música en vivo y más de 40 marcas locales.',
+    organizer: {
+      name: 'Asociación de Emprendedores Boca del Monte',
+      role: 'Coordinación Barrial',
+      verified: true,
+      type: 'Colectivo Vecinal'
+    },
+    sourceType: 'municipal',
+    targetAudience: 'Jóvenes y Familias',
+    cost: 'Entrada Libre',
+    capacity: 1400,
+    rsvpCount: 520,
     isFeatured: false,
     status: 'Aprobado',
-    tags: ['Deporte', 'Baloncesto', 'Juventud', 'Competencia'],
-    amenities: ['Graderíos', 'Árbitros Certificados', 'Paramédicos', 'Música en Vivo'],
-    gradientTheme: 'from-blue-700 via-indigo-600 to-red-600',
-    accentColor: '#2563eb',
-    iconName: 'Trophy',
-    imageUrl: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=85',
+    tags: ['Bazar Nocturno', 'Boca del Monte', 'Emprendedores', 'Música'],
+    amenities: ['Stands Iluminados', 'Seguridad PMT Canales', 'Zona Gastronómica', 'Música en Vivo'],
+    gradientTheme: 'from-purple-700 via-indigo-800 to-blue-900',
+    accentColor: '#9333ea',
+    iconName: 'Store',
+    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=85',
     galleryImages: [
-      'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1519766304817-4f37bda74a29?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80'
     ],
-    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5610,-90.5615',
-    wazeUrl: 'https://waze.com/ul?ll=14.5610,-90.5615&navigate=yes',
-    howToGetThere: 'Canchas Municipales Ciudad Real II Zona 10. Ingreso por Avenida Petapa hacia Ciudad Real. Vigilancia PMT en la entrada.'
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5490,-90.5180',
+    wazeUrl: 'https://waze.com/ul?ll=14.5490,-90.5180&navigate=yes',
+    howToGetThere: 'Bulevar Principal de Boca del Monte, a 10 minutos de la Avenida Hincapié Zona 13 de la Capital. Carriles fluidos con PMT.'
   },
+
+  // --- EXCLUSIVOS RADAR SUR (INTERMUNICIPALES) ---
   {
     id: 'ev-radar-01',
-    title: 'Radar Fest Villa Nueva: Feria Gastronómica & Food Trucks',
+    title: 'Radar Fest Metropolitano Sur: Food Trucks & Conciertos',
     category: 'Gastronómico',
+    municipio: 'Villa Nueva',
     date: '2026-10-28',
     time: '11:00 AM - 09:00 PM',
-    locationName: 'Explanada El Frutal & Centro Comercial Metrocentro VN',
+    locationName: 'Explanada El Frutal & Conexión Petapa',
     zona: 'Zona 5 - El Frutal',
     coordinates: { lat: 14.5120, lng: -90.5720 },
-    description: 'Evento privado y exclusivo producido por la plataforma Radar Villa Nueva. Más de 18 food trucks y stands de emprendedores locales, música acústica en vivo, área de degustación de café de especialidad, zona infantil con inflables y rifas de pases VIP para la comunidad de Radar.',
-    shortSummary: 'Feria gastronómica y bazar de emprendedores organizado por Radar Villa Nueva con food trucks y música.',
+    description: 'Evento intermunicipal privado y exclusivo producido por la plataforma Radar Sur. Más de 25 food trucks y stands de emprendedores de Villa Nueva, San Miguel Petapa y Villa Canales. Música acústica en vivo, área de degustación de café de Bárcena, juegos infantiles y cupones de descuento exclusivos.',
+    shortSummary: 'Gran feria gastronómica y comercial con food trucks y música uniendo los 3 municipios del Sur.',
     organizer: {
-      name: 'Radar Villa Nueva (Producción)',
-      role: 'Organizador Oficial Radar',
+      name: 'Radar Sur (Producción Central)',
+      role: 'Organizador Oficial Radar Sur',
       verified: true,
-      type: 'Radar Villa Nueva (Exclusivo)'
+      type: 'Radar Sur (Exclusivo)'
     },
     sourceType: 'radar',
     targetAudience: 'Familias, Jóvenes y Amantes del Buen Comer',
-    cost: 'Entrada Libre',
-    capacity: 3000,
-    rsvpCount: 1420,
+    cost: 'Entrada Libre con Radar',
+    capacity: 3500,
+    rsvpCount: 1680,
     isFeatured: true,
     status: 'Destacado',
-    tags: ['Radar Exclusivo', 'Food Trucks', 'Emprendedores', 'Música en Vivo', 'Gastronomía'],
+    tags: ['Radar Sur Exclusivo', 'Food Trucks', 'Emprendedores', 'Música en Vivo', 'Gastronomía'],
     amenities: ['Área de Food Trucks', 'Stands Emprendedores', 'Tarima Musical', 'Seguridad Privada & PMT', 'Baños Móviles'],
     gradientTheme: 'from-blue-900 via-red-600 to-amber-500',
     accentColor: '#dc2626',
@@ -305,29 +436,29 @@ export const INITIAL_EVENTS: EventItem[] = [
     galleryImages: [
       'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?auto=format&fit=crop&w=800&q=80',
       'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80'
     ],
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5120,-90.5720',
     wazeUrl: 'https://waze.com/ul?ll=14.5120,-90.5720&navigate=yes',
-    howToGetThere: 'Bulevar El Frutal Zona 5, frente a Metrocentro Villa Nueva. Acceso fluido con parqueo privado vigilado.'
+    howToGetThere: 'Bulevar El Frutal Zona 5, frente a Metrocentro Villa Nueva y a 2 minutos de Villa Hermosa Petapa.'
   },
   {
     id: 'ev-radar-02',
-    title: 'Noche de Rock Acústico & Bazar Nocturno Radar',
+    title: 'Noche de Rock Acústico & Bazar Nocturno Radar Sur',
     category: 'Cultural',
+    municipio: 'Villa Nueva',
     date: '2026-11-06',
     time: '06:00 PM - 11:00 PM',
     locationName: 'Terraza y Jardines de Santa Clara',
     zona: 'Zona 4 - Santa Clara',
     coordinates: { lat: 14.5380, lng: -90.5725 },
-    description: 'Evento nocturno privado de Radar Villa Nueva. Bandas tributo de rock en español acústico, bazar de diseño villanovano independiente, cervecería artesanal nacional y zona lounge con café de Bárcena.',
-    shortSummary: 'Bazar nocturno con música en vivo y marcas villanovanas exclusivas organizado por Radar.',
+    description: 'Evento nocturno privado de Radar Sur. Bandas tributo de rock en español acústico, bazar de diseño del sur independiente, cervecería artesanal nacional y zona lounge con café de Bárcena.',
+    shortSummary: 'Bazar nocturno con bandas en vivo y marcas locales exclusivas organizado por Radar.',
     organizer: {
-      name: 'Radar Villa Nueva Entretenimiento',
+      name: 'Radar Sur Entretenimiento',
       role: 'Producción Privada Radar',
       verified: true,
-      type: 'Radar Villa Nueva (Exclusivo)'
+      type: 'Radar Sur (Exclusivo)'
     },
     sourceType: 'radar',
     targetAudience: 'Jóvenes y Adultos',
@@ -336,7 +467,7 @@ export const INITIAL_EVENTS: EventItem[] = [
     rsvpCount: 460,
     isFeatured: true,
     status: 'Destacado',
-    tags: ['Radar Exclusivo', 'Rock Acústico', 'Bazar Nocturno', 'Café & Cerveza Artesanal'],
+    tags: ['Radar Sur Exclusivo', 'Rock Acústico', 'Bazar Nocturno', 'Café & Cerveza'],
     amenities: ['Zona Lounge Techada', 'Seguridad Privada', 'Stands de Emprendedores', 'Parqueo Iluminado'],
     gradientTheme: 'from-blue-950 via-indigo-900 to-red-700',
     accentColor: '#2563eb',
@@ -344,163 +475,108 @@ export const INITIAL_EVENTS: EventItem[] = [
     imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=85',
     galleryImages: [
       'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80'
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80'
     ],
     mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5380,-90.5725',
     wazeUrl: 'https://waze.com/ul?ll=14.5380,-90.5725&navigate=yes',
     howToGetThere: 'Centro Comercial Santa Clara Zona 4. Ingreso directo por Calzada Raúl Aguilar Batres / CA-9 Sur.'
-  }
-];
-
-export const INITIAL_FORUM_POSTS: ForumPost[] = [
-  {
-    id: 'post-vn-101',
-    title: '¿Alguien sabe si el Festival del Chuchito tiene rampa para cochecitos de bebé?',
-    authorName: 'Claudia Morales',
-    authorAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80',
-    authorRole: 'Vecino',
-    zona: 'Zona 1 - Centro Histórico',
-    timestamp: 'Hace 45 minutos',
-    content: '¡Hola vecinos! Queremos ir este sábado con mis dos nenas pequeñas y abuelita. ¿Saben si el parque central tiene acceso con rampas habilitadas y dónde recomiendan estacionar para no caminar tanto con la carriola?',
-    eventId: 'ev-vn-01',
-    eventTitle: 'Festival del Chuchito y Sabor Villanovano',
-    upvotes: 18,
-    upvotedBy: ['usr-01', 'usr-03'],
-    tags: ['Accesibilidad', 'Familia', 'Parqueo'],
-    replies: [
-      {
-        id: 'rep-01',
-        authorName: 'Carlos Mendizábal (PMT Villa Nueva)',
-        authorRole: 'Admin Municipal',
-        authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
-        timestamp: 'Hace 28 minutos',
-        content: '¡Hola doña Claudia! Sí, las 4 esquinas del parque central cuentan con rampas recién niveladas. Habilitamos parqueo preferencial para familias con bebés y adultos mayores a un costado del edificio municipal sobre la 3a calle.'
-      },
-      {
-        id: 'rep-02',
-        authorName: 'Subagente Moderador IA',
-        authorRole: 'Moderador IA',
-        authorAvatar: '',
-        isAiAgent: true,
-        timestamp: 'Hace 25 minutos',
-        content: '🤖 [Subagente Asistente Vecinal]: Verificado. El evento cuenta con el sello "100% Accesible para Familias". Si llegas entre 9:30 AM y 11:00 AM encontrarás sombra óptima y menor congestión vehicular.'
-      }
-    ],
-    aiModeration: {
-      status: 'safe',
-      familyScore: 99,
-      analysisNotes: 'Consulta comunitaria cordial, respetuosa y orientada al bienestar familiar y accesibilidad.',
-      checkedByAgent: 'Agente Guardián de la Comunidad VN',
-      checkedAt: '2026-10-14 17:15'
-    }
   },
   {
-    id: 'post-vn-102',
-    title: '¡Felicitaciones a los organizadores de la Ciclovía en El Frutal! Nos vemos en patines',
-    authorName: 'Marcos Rivas',
-    authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
-    authorRole: 'Líder Comunitario',
-    zona: 'Zona 5 - El Frutal',
-    timestamp: 'Hace 2 horas',
-    content: 'La semana pasada estuvo increíble el ambiente con los chicos. Este miércoles llevamos grupo de 15 patinadores con chalecos reflectivos. Les sugiero a todos llevar casco y agua para los pequeños.',
-    eventId: 'ev-vn-02',
-    eventTitle: 'Ciclovía Nocturna y Roller Fest El Frutal',
-    upvotes: 34,
-    upvotedBy: ['usr-01'],
-    tags: ['Deporte', 'Patines', 'Comunidad'],
-    replies: [
-      {
-        id: 'rep-03',
-        authorName: 'Fernanda Ortiz',
-        authorRole: 'Vecino',
-        authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80',
-        timestamp: 'Hace 1 hora',
-        content: '¡Allí estaremos! Mis sobrinos van a estrenar sus patines con luces neón. ¡Qué alegría ver eventos así en Villa Nueva!'
-      }
+    id: 'ev-radar-03',
+    title: 'Gran Bicitour Intermunicipal: Villa Nueva · Petapa · Villa Canales',
+    category: 'Deportivo',
+    municipio: 'San Miguel Petapa',
+    date: '2026-11-15',
+    time: '07:00 AM - 12:00 PM',
+    locationName: 'Circuito Conector del Sur (Partida: El Frutal)',
+    zona: 'Petapa - Los Álamos & El Frutal',
+    coordinates: { lat: 14.5110, lng: -90.5650 },
+    description: 'Histórica rodada ciclística intermunicipal de 16 km conectando Villa Nueva, San Miguel Petapa y Villa Canales en un solo circuito recreativo. Operativo conjunto de las 3 Policías Municipales de Tránsito (PMT VN, PMT Petapa y PMT Canales). Puntos de hidratación y medalla para los primeros 500 inscritos.',
+    shortSummary: 'Circuito ciclístico uniendo Villa Nueva, Petapa y Villa Canales resguardado por las 3 PMT.',
+    organizer: {
+      name: 'Radar Sur & Alianzas Viales Intermunicipales',
+      role: 'Organizador Oficial Radar Sur',
+      verified: true,
+      type: 'Radar Sur (Exclusivo)'
+    },
+    sourceType: 'radar',
+    targetAudience: 'Ciclistas, Jóvenes y Familias',
+    cost: 'Gratis con Registro Radar',
+    capacity: 2000,
+    rsvpCount: 1180,
+    isFeatured: true,
+    status: 'Destacado',
+    tags: ['Intermunicipal', 'Bicitour', '3 Municipios', 'Deporte', 'Radar Sur'],
+    amenities: ['Resguardo 3 PMT', 'Puntos de Hidratación', 'Ambulancias en Ruta', 'Taller Móvil'],
+    gradientTheme: 'from-yellow-500 via-emerald-600 to-cyan-600',
+    accentColor: '#10b981',
+    iconName: 'Bike',
+    imageUrl: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=1200&q=85',
+    galleryImages: [
+      'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80'
     ],
-    aiModeration: {
-      status: 'safe',
-      familyScore: 98,
-      analysisNotes: 'Fomenta el deporte saludable, seguridad vial comunitaria y convivencia.',
-      checkedByAgent: 'Agente Guardián de la Comunidad VN',
-      checkedAt: '2026-10-14 16:05'
-    }
-  },
-  {
-    id: 'post-vn-103',
-    title: 'Propuesta: ¿Podemos organizar una clase de yoga y meditación en Naciones Unidas?',
-    authorName: 'Elena De León',
-    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
-    authorRole: 'Vecino',
-    zona: 'Bárcena & Naciones Unidas',
-    timestamp: 'Hace 4 horas',
-    content: 'Aprovechando el aire fresco del mirador hacia el lago, varias mamás de Bárcena quisiéramos reunirnos un domingo por la mañana para yoga suave familiar. ¿A quién podemos solicitar el espacio en la administración del parque?',
-    upvotes: 27,
-    upvotedBy: [],
-    tags: ['Propuesta', 'Salud', 'Bienestar'],
-    replies: [
-      {
-        id: 'rep-04',
-        authorName: 'Subagente Curador & Gestor IA',
-        authorRole: 'Moderador IA',
-        authorAvatar: '',
-        isAiAgent: true,
-        timestamp: 'Hace 3 horas',
-        content: '🤖 [Subagente Gestor]: ¡Excelente iniciativa! Puedes registrar tu propuesta directamente desde el botón "Proponer Evento" en esta plataforma. Se envía al panel municipal y te asignan horario y permisos en menos de 24 horas.'
-      }
-    ],
-    aiModeration: {
-      status: 'safe',
-      familyScore: 100,
-      analysisNotes: 'Propuesta constructiva de bienestar y vida saludable.',
-      checkedByAgent: 'Agente Guardián de la Comunidad VN',
-      checkedAt: '2026-10-14 14:30'
-    }
+    mapsUrl: 'https://www.google.com/maps/search/?api=1&query=14.5110,-90.5650',
+    wazeUrl: 'https://waze.com/ul?ll=14.5110,-90.5650&navigate=yes',
+    howToGetThere: 'Punto de reunión: Bulevar El Frutal (conexión Petapa y Villa Nueva). Habrá parqueo guiado desde las 06:15 AM.'
   }
 ];
 
 export const INITIAL_SUBAGENTS: AiSubagent[] = [
   {
     id: 'agent-guardian',
-    name: 'Guardián Comunitario',
-    role: 'Moderación y Seguridad en Tiempo Real',
-    title: 'Subagente de Convivencia Familiar',
-    avatar: 'ShieldCheck',
+    name: 'Guardián del Sur',
+    role: 'Moderación & Convivencia Segura',
+    title: 'Guardián Comunitario Intermunicipal',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
     status: 'active',
-    lastAction: 'Post #101 analizado: 99% Convivencia Familiar (Aprobado automáticamente)',
-    processedCount: 142,
+    lastAction: 'Verificó 14 propuestas en Villa Nueva, Petapa y Villa Canales',
+    processedCount: 420,
     model: 'gemini-3.8-flash',
-    description: 'Inspecciona foros y comentarios de forma ininterrumpida. Detecta lenguaje inapropiado, protege el ambiente familiar y califica la cordialidad vecinal.',
-    specialty: 'Filtro de seguridad, detección de toxicidad y fomento de diálogo constructivo.',
-    badges: ['Mod en Vivo', 'Filtro Familiar', 'Cero Odio']
+    description: 'Monitorea eventos y comentarios vecinales garantizando un ambiente familiar, pacífico y 100% positivo en los tres municipios aliados.',
+    specialty: 'Detección de toxicidad, cálculo del Family Score y certificación de seguridad vecinal.',
+    badges: ['Convivencia Familiar 100%', 'Verificación en Tiempo Real', 'Intermunicipal']
   },
   {
     id: 'agent-curator',
-    name: 'Curador de Experiencias VN',
-    role: 'Enriquecimiento y Optimización de Eventos',
-    title: 'Subagente Editorial & Logístico',
-    avatar: 'Sparkles',
+    name: 'Curador de Experiencias Sur',
+    role: 'Optimización de Actividades',
+    title: 'Curador Cultural & Logístico Metropolitano',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
     status: 'active',
-    lastAction: 'Optimizó logística y accesibilidad para "Festival del Chuchito"',
-    processedCount: 89,
+    lastAction: 'Enriqueció la agenda intermunicipal de Villa Nueva, Petapa y Villa Canales',
+    processedCount: 310,
     model: 'gemini-3.8-flash',
-    description: 'Asiste a vecinos y organizadores en la redacción atractiva de convocatorias, recomienda amenidades faltantes (parqueo, sombra, hidratación) y categoriza zonas.',
-    specialty: 'Copywriting urbano maximalista, SEO local de eventos y validación logística.',
-    badges: ['Copywriting Creativo', 'Logística VN', 'Tags Automáticos']
+    description: 'Transforma borradores de eventos en anuncios llamativos con estimaciones de aforo, etiquetas urbanas y logística vial de las 3 PMT.',
+    specialty: 'Marketing comunitario, redacción urbana y sinergia comercial barrial.',
+    badges: ['Curaduría de Impacto', 'Logística 3 PMT', 'Creatividad Local']
+  },
+  {
+    id: 'agent-concierge',
+    name: 'Concierge Ciudadano del Sur',
+    role: 'Asistente de Rutas & Planes',
+    title: 'Guía Vecinal Intermunicipal',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80',
+    status: 'active',
+    lastAction: 'Orientó sobre accesos por CA-9, VAS y Bulevar El Frutal',
+    processedCount: 680,
+    model: 'gemini-3.8-flash',
+    description: 'Resuelve dudas a los vecinos en tiempo real sobre cómo llegar, parqueos seguros, recomendaciones según municipio y actividades infantiles.',
+    specialty: 'Rutas viales, guía de accesibilidad y atención al ciudadano del Sur.',
+    badges: ['Respuesta Inmediata', 'Rutas Google Maps & Waze', 'Guía Local']
   },
   {
     id: 'agent-analyst',
-    name: 'Vigia de Afluencia & Datos',
-    role: 'Estadísticas y Notificaciones Predictivas',
-    title: 'Subagente Predictivo & Georadar',
-    avatar: 'Activity',
+    name: 'Analista de Movilidad & Métricas',
+    role: 'Monitoreo de Impacto Comunitario',
+    title: 'Analista Demográfico & Flujo Sur',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
     status: 'active',
-    lastAction: 'Calculó afluencia pico para el fin de semana: +2,150 vecinos esperados',
-    processedCount: 230,
+    lastAction: 'Proyectó afluencia de 7,400+ vecinos en los 3 municipios',
+    processedCount: 290,
     model: 'gemini-3.8-flash',
-    description: 'Monitorea métricas en tiempo real, calcula el radio de impacto geográfico para alertas push y predice asistencia según zona y horarios de tráfico.',
-    specialty: 'Cálculo de densidad vecinal, geocercas y pronósticos de participación comunitaria.',
+    description: 'Calcula el radio de cobertura geográfico, emite alertas push vecinales y predice asistencia según municipio y tráfico interconectado.',
+    specialty: 'Geocercas metropolitanas, métricas vivas y pronósticos de participación comunitaria.',
     badges: ['Predictor de Afluencia', 'Push Geo-Targeting', 'Métricas Vivas']
   }
 ];
@@ -509,84 +585,87 @@ export const INITIAL_USER: UserProfile = {
   id: 'usr-01',
   name: 'Brayan Martínez',
   email: 'brajanmartinez0490@gmail.com',
-  role: 'admin', // defaulted to admin so the user can immediately experience the full admin panel & subagents!
+  role: 'admin',
+  municipio: 'Villa Nueva',
   zona: 'Zona 1 - Centro Histórico',
   avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-  savedEvents: ['ev-vn-01', 'ev-vn-02'],
+  savedEvents: ['ev-vn-01', 'ev-smp-01', 'ev-vc-01'],
   rsvps: [
     {
       eventId: 'ev-vn-01',
-      ticketCode: 'VN-2026-CHUCHITO-894',
+      ticketCode: 'SUR-2026-CHUCHITO-894',
       numPeople: 3,
-      qrSimulated: 'QR_VN_CHUCHITO_01',
+      qrSimulated: 'QR_SUR_CHUCHITO_01',
       registeredAt: '2026-10-14 10:20'
     }
   ],
   notificationsEnabled: true,
-  notificationRadiusKm: 5
+  notificationRadiusKm: 12
 };
 
 export const INITIAL_METRICS: PlatformMetrics = {
-  totalEventsActive: 7,
-  totalRsvps: 3145,
-  activeNeighbors: 4890,
-  familyFriendlinessIndex: 98.4,
+  totalEventsActive: 10,
+  totalRsvps: 7420,
+  activeNeighbors: 12850,
+  familyFriendlinessIndex: 99.1,
   topZonas: [
-    { zona: 'Zona 1 - Centro Histórico', count: 1240, percentage: 39 },
-    { zona: 'Zona 5 - El Frutal', count: 780, percentage: 25 },
-    { zona: 'Bárcena & Naciones Unidas', count: 620, percentage: 20 },
-    { zona: 'Zona 4 - Santa Clara', count: 505, percentage: 16 }
+    { zona: 'Villa Nueva (12 Zonas)', count: 3240, percentage: 44 },
+    { zona: 'San Miguel Petapa (Álamos & Centro)', count: 2340, percentage: 31 },
+    { zona: 'Villa Canales (Centro & Barillas)', count: 1840, percentage: 25 }
   ],
   categoryBreakdown: [
-    { category: 'Familiar', count: 980, color: '#10b981' },
-    { category: 'Gastronómico', count: 840, color: '#f97316' },
-    { category: 'Deportivo', count: 930, color: '#06b6d4' },
-    { category: 'Juventud y Arte', count: 395, color: '#d946ef' }
+    { category: 'Familiar', count: 2480, color: '#10b981' },
+    { category: 'Gastronómico', count: 2140, color: '#f97316' },
+    { category: 'Deportivo', count: 1730, color: '#06b6d4' },
+    { category: 'Juventud y Arte', count: 1070, color: '#d946ef' }
   ],
   weeklyAttendanceForecast: [
-    { day: 'Mié', predictedAttendance: 620 },
-    { day: 'Jue', predictedAttendance: 340 },
-    { day: 'Vie', predictedAttendance: 890 },
-    { day: 'Sáb', predictedAttendance: 2450 },
-    { day: 'Dom', predictedAttendance: 1980 }
+    { day: 'Mié', predictedAttendance: 920 },
+    { day: 'Jue', predictedAttendance: 640 },
+    { day: 'Vie', predictedAttendance: 1890 },
+    { day: 'Sáb', predictedAttendance: 4450 },
+    { day: 'Dom', predictedAttendance: 3980 }
   ],
   moderationStats: {
-    reviewedPosts: 142,
-    autoApproved: 139,
-    flagged: 3,
-    responseTimeMs: 310
+    reviewedPosts: 284,
+    autoApproved: 279,
+    flagged: 5,
+    responseTimeMs: 290
   }
 };
 
-// Geolocation center for Villa Nueva
-export const VILLA_NUEVA_CENTER = {
-  lat: 14.5262,
-  lng: -90.5878,
-  cityName: 'Villa Nueva, Guatemala',
+// Geolocation center for South Metropolitan Area (VN - Petapa - Villa Canales)
+export const RADAR_SUR_CENTER = {
+  lat: 14.5120,
+  lng: -90.5650,
+  cityName: 'Eje Metropolitano Sur (Villa Nueva · San Miguel Petapa · Villa Canales)',
   department: 'Guatemala'
 };
 
+export const VILLA_NUEVA_CENTER = RADAR_SUR_CENTER;
+
 export const INITIAL_ADS: EntrepreneurAd[] = [
+  // Villa Nueva
   {
     id: 'ad-vn-01',
     businessName: 'El Chuchito Gourmet & Ahumados Villa Nueva',
     ownerName: 'Doña Elena Batres',
     category: 'Gastronomía & Food Trucks',
+    municipio: 'Villa Nueva',
     phone: '+502 5412-8890',
     email: 'contacto@chuchitovillanovano.gt',
     instagramUrl: 'https://instagram.com/chuchito_villanovano',
     facebookUrl: 'https://facebook.com/chuchitovillanovano',
     spaceType: 'Espacio Food Truck / Remolque',
     targetEventId: 'ev-radar-01',
-    targetEventTitle: 'Radar Fest Villa Nueva: Feria Gastronómica',
+    targetEventTitle: 'Radar Fest Metropolitano Sur: Food Trucks & Conciertos',
     zona: 'Zona 1 - Centro Histórico',
-    productDescription: 'Chuchitos tradicionales de cerdo ahumado, pollo en salsa de chile pasa criollo y masa de maíz amarillo nixtamalizado en fogón de leña. Más de 15 años deleitando a Villa Nueva.',
+    productDescription: 'Chuchitos tradicionales estilo Villa Nueva elaborados con maíz criollo, recado especial de chile pasa y guaque, carne ahumada artesanal y salsa de tomate fresco.',
     imageUrl: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80',
-    galleryImages: [
-      'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'
-    ],
-    specialOffer: '10% de descuento y atol de elote gratis en compras mayores a Q50 para usuarios de Radar',
+    specialOffer: '15% de descuento en órdenes familiares de más de 6 chuchitos',
+    couponCode: 'RADAR-CHUCHITO15',
+    discountPercentage: 15,
+    couponsLeft: 12,
     status: 'destacado',
     createdAt: '2026-10-12',
     budget: 'Q400 por espacio',
@@ -594,9 +673,10 @@ export const INITIAL_ADS: EntrepreneurAd[] = [
   },
   {
     id: 'ad-vn-02',
-    businessName: 'Café Mirador Bárcena & Repostería',
-    ownerName: 'Ing. Carlos Monterroso',
+    businessName: 'Café de Especialidad Finca Bárcena',
+    ownerName: 'Carlos Mendizábal',
     category: 'Café, Repostería & Postres',
+    municipio: 'Villa Nueva',
     phone: '+502 4190-3321',
     email: 'info@cafebarcena.gt',
     instagramUrl: 'https://instagram.com/cafebarcena_gt',
@@ -604,98 +684,149 @@ export const INITIAL_ADS: EntrepreneurAd[] = [
     targetEventId: 'ev-vn-03',
     targetEventTitle: 'Noche de Cine Bajo las Estrellas & Pícnic',
     zona: 'Bárcena & Naciones Unidas',
-    productDescription: 'Café de especialidad cosechado en las faldas de Bárcena a 1,600 msnm. Variedades Bourbon y Caturra tostadas artesanalmente con perfiles achocolatados y repostería casera.',
+    productDescription: 'Café de especialidad cosechado en las faldas de Bárcena a 1,600 msnm. Variedades Bourbon y Caturra tostadas artesanalmente con notas achocolatadas.',
     imageUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
-    galleryImages: [
-      'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80'
-    ],
-    specialOffer: 'Muestra gratis de espresso y 2x1 en capuchinos de 4oz con tu ticket de Radar',
+    specialOffer: '20% OFF en capuchinos dobles y café en grano con código Radar',
+    couponCode: 'RADAR-BARCENA20',
+    discountPercentage: 20,
+    couponsLeft: 8,
     status: 'destacado',
     createdAt: '2026-10-13',
     budget: 'Q350 por stand',
     verifiedBadge: true
   },
+
+  // San Miguel Petapa
   {
-    id: 'ad-vn-03',
-    businessName: 'Cueros & Textiles Linda Vista',
-    ownerName: 'Marta Lidia Gómez',
-    category: 'Moda, Ropa & Calzado',
-    phone: '+502 5901-7744',
-    email: 'contacto@cueroslindavista.gt',
-    instagramUrl: 'https://instagram.com/cueros_lindavista',
+    id: 'ad-smp-01',
+    businessName: 'Antojitos & Carnitas Tradicionales Petapa',
+    ownerName: 'Don Mario Gómez',
+    category: 'Gastronomía & Food Trucks',
+    municipio: 'San Miguel Petapa',
+    phone: '+502 5521-3344',
+    email: 'carnitaspetapa@gmail.com',
+    instagramUrl: 'https://instagram.com/carnitas_petapa',
+    spaceType: 'Espacio Food Truck / Remolque',
+    targetEventId: 'ev-smp-01',
+    targetEventTitle: 'Festival del Mango y Sabor Petapense',
+    zona: 'Petapa - Centro & Plaza Mayor',
+    productDescription: 'Famosas carnitas y chicharrones petapenses con tortillas recién salidas del comal, guacamole fresco, chirmol y rábanos.',
+    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+    specialOffer: '15% de descuento en platos mixtos de carnitas y chicharrón',
+    couponCode: 'RADAR-PETAPA15',
+    discountPercentage: 15,
+    couponsLeft: 15,
+    status: 'destacado',
+    createdAt: '2026-10-14',
+    budget: 'Q350 por espacio',
+    verifiedBadge: true
+  },
+  {
+    id: 'ad-smp-02',
+    businessName: 'Taller & Ciclismo Pro Los Álamos',
+    ownerName: 'Alejandro Estrada',
+    category: 'Servicios Locales & Profesionales',
+    municipio: 'San Miguel Petapa',
+    phone: '+502 4110-8822',
+    email: 'bicisur@gmail.com',
     spaceType: 'Stand Comercial en Feria / Bazar',
-    targetEventId: 'ev-radar-02',
-    targetEventTitle: 'Noche de Rock Acústico & Bazar Nocturno Radar',
-    zona: 'Zona 2 - Linda Vista',
-    productDescription: 'Billeteras, bolsos de cuero legítimo con detalles de tejidos típicos guatemaltecos y fajas bordadas con motivos mayas hechas a mano por artesanas de Linda Vista.',
-    imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
-    galleryImages: [
-      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80'
-    ],
-    specialOffer: 'Personalizado con grabado láser de iniciales gratis en cada compra',
+    targetEventId: 'ev-radar-03',
+    targetEventTitle: 'Gran Bicitour Intermunicipal: Villa Nueva · Petapa · Villa Canales',
+    zona: 'Petapa - Los Álamos & El Frutal',
+    productDescription: 'Servicio mecánico express, repuestos originales de bicicleta, cascos certificados y accesorios para ciclistas urbanos del Sur.',
+    imageUrl: 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=800&q=80',
+    specialOffer: '20% de descuento en calibración de cambios y frenos para participantes de Radar',
+    couponCode: 'RADAR-BICISUR20',
+    discountPercentage: 20,
+    couponsLeft: 10,
     status: 'aprobado',
     createdAt: '2026-10-14',
     budget: 'Q300 por stand',
     verifiedBadge: true
   },
+
+  // Villa Canales
   {
-    id: 'ad-vn-04',
-    businessName: 'Heladería Natural & Paletas El Frutal',
-    ownerName: 'Javier Castillo',
-    category: 'Gastronomía & Food Trucks',
-    phone: '+502 4733-1199',
-    email: 'paletasfrutal@gmail.com',
-    instagramUrl: 'https://instagram.com/paletas_frutal',
-    spaceType: 'Espacio Food Truck / Remolque',
-    targetEventId: 'ev-vn-02',
-    targetEventTitle: 'Ciclovía Nocturna y Roller Fest El Frutal',
-    zona: 'Zona 5 - El Frutal',
-    productDescription: 'Paletas artesanales con frutas 100% naturales (maracuyá con leche condensada, mango con tajín, coco tostado y fresas con crema) servidas desde un remolque vintage.',
-    imageUrl: 'https://images.unsplash.com/photo-1505394033641-40c6ad1178d7?auto=format&fit=crop&w=800&q=80',
-    specialOffer: 'Paleta infantil a Q5 al mostrar tu pase de registro familiar de Radar',
-    status: 'aprobado',
-    createdAt: '2026-10-14',
-    budget: 'Q300 por espacio',
-    verifiedBadge: true
-  },
-  {
-    id: 'ad-vn-05',
-    businessName: 'Audio Pro & Tarimas Villanovanas',
-    ownerName: 'Marco Antonio Rodas',
-    category: 'Patrocinador Oficial de Evento',
-    phone: '+502 5200-9988',
-    email: 'gerencia@audioprovn.com',
-    websiteUrl: 'https://audioprovillanueva.gt',
-    spaceType: 'Patrocinio Oficial de Evento (Lonas & Escenario)',
-    targetEventId: 'ev-radar-01',
-    targetEventTitle: 'Radar Fest Villa Nueva: Feria Gastronómica',
-    zona: 'Zona 4 - Santa Clara',
-    productDescription: 'Empresa villanovana proveedora de sonido line-array profesional, luces robóticas, microfonía y pantallas LED para festivales y ferias patronales.',
-    imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80',
-    specialOffer: 'Descuento del 20% en renta de audio a organizadores registrados en Radar',
-    status: 'destacado',
-    createdAt: '2026-10-10',
-    budget: 'Patrocinador Técnico Oficial',
-    verifiedBadge: true
-  },
-  {
-    id: 'ad-vn-06',
-    businessName: 'Vivero Botánico & Suculentas Santa Clara',
-    ownerName: 'Sonia Marroquín',
-    category: 'Artesanías & Hecho a Mano',
-    phone: '+502 4321-0088',
-    email: 'suculentas.santaclara@gmail.com',
+    id: 'ad-vc-01',
+    businessName: 'Dulces & Conservas de Piña Canaleña',
+    ownerName: 'Familia Morales Canales',
+    category: 'Gastronómico',
+    municipio: 'Villa Canales',
+    phone: '+502 5304-9911',
+    email: 'pinascanaleñas@gmail.com',
+    instagramUrl: 'https://instagram.com/pinas_canaleñas',
     spaceType: 'Stand Comercial en Feria / Bazar',
-    targetEventId: 'ev-vn-05',
-    targetEventTitle: 'Reforestación Comunitaria y Senderismo Verde',
-    zona: 'Zona 4 - Santa Clara',
-    productDescription: 'Cactus, suculentas y plantas medicinales en macetas artesanales de barro pintadas a mano con motivos folclóricos villanovanos.',
-    imageUrl: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=800&q=80',
-    specialOffer: 'Mini suculenta de cortesía por compras mayores a Q40',
-    status: 'en_revision',
+    targetEventId: 'ev-vc-01',
+    targetEventTitle: 'Gran Feria de la Piña & Dulces Típicos Canaleños',
+    zona: 'Villa Canales - Centro & Plaza',
+    productDescription: 'Conservas artesanales de piña cosechada en Villa Canales, mermeladas sin preservantes, piña deshidratada, vinagre de piña y néctares naturales.',
+    imageUrl: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=800&q=80',
+    specialOffer: '15% de descuento en la compra del combo tripack de mermeladas',
+    couponCode: 'RADAR-PINA15',
+    discountPercentage: 15,
+    couponsLeft: 20,
+    status: 'destacado',
     createdAt: '2026-10-14',
-    budget: 'Q250 por stand',
-    verifiedBadge: false
+    budget: 'Q300 por stand',
+    verifiedBadge: true
+  },
+  {
+    id: 'ad-vc-02',
+    businessName: 'Vivero Floral & Orquídeas Santa Elena Barillas',
+    ownerName: 'Lorena Vásquez',
+    category: 'Artesanías & Hecho a Mano',
+    municipio: 'Villa Canales',
+    phone: '+502 4920-5588',
+    email: 'orquideasbarillas@gmail.com',
+    spaceType: 'Stand Comercial en Feria / Bazar',
+    targetEventId: 'ev-vc-02',
+    targetEventTitle: 'Festival de las Flores & Viento en Santa Elena Barillas',
+    zona: 'Villa Canales - Santa Elena Barillas',
+    productDescription: 'Orquídeas nativas, bromelias y plantas ornamentales cultivadas en el microclima fresco de Santa Elena Barillas con maceteros rústicos de barro.',
+    imageUrl: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=800&q=80',
+    specialOffer: '25% de descuento en la segunda planta ornamental',
+    couponCode: 'RADAR-ORQUIDEAS25',
+    discountPercentage: 25,
+    couponsLeft: 10,
+    status: 'destacado',
+    createdAt: '2026-10-15',
+    budget: 'Q300 por stand',
+    verifiedBadge: true
+  }
+];
+
+export const INITIAL_FORUM_POSTS: ForumPost[] = [
+  {
+    id: 'post-sur-101',
+    title: '¿Habrá transporte o conexión entre Villa Nueva, Petapa y Villa Canales para los eventos?',
+    authorName: 'Claudia Morales',
+    authorAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&q=80',
+    authorRole: 'Vecino',
+    zona: 'Zona 1 - Centro Histórico',
+    timestamp: 'Hace 35 minutos',
+    content: '¡Hola vecinos de Villa Nueva, Petapa y Canales! Qué excelente que Radar ahora cubra los 3 municipios. ¿Saben si el Bicitour y las ferias gastronómicas contarán con parqueo y operativos de las 3 PMT coordinadas?',
+    eventId: 'ev-radar-03',
+    eventTitle: 'Gran Bicitour Intermunicipal: Villa Nueva · Petapa · Villa Canales',
+    upvotes: 32,
+    upvotedBy: ['usr-01'],
+    tags: ['Intermunicipal', 'PMT', 'Transporte', 'Sur'],
+    replies: [
+      {
+        id: 'rep-01',
+        authorName: 'Guardián del Sur',
+        authorRole: 'Moderador IA',
+        authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+        timestamp: 'Hace 20 minutos',
+        content: '¡Totalmente confirmado, Claudia! Las 3 PMT (Villa Nueva 1531, Petapa y Villa Canales) tienen operativo interconectado en Bulevar El Frutal, VAS y CA-9.',
+        isAiAgent: true
+      }
+    ],
+    aiModeration: {
+      status: 'safe',
+      familyScore: 100,
+      analysisNotes: 'Aporte constructivo verificado para convivencia intermunicipal.',
+      checkedByAgent: 'agent-guardian',
+      checkedAt: '2026-10-15 16:00'
+    }
   }
 ];

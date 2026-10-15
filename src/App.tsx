@@ -5,6 +5,7 @@ import {
   INITIAL_USER, 
   INITIAL_METRICS,
   INITIAL_ADS,
+  RADAR_SUR_CENTER,
   VILLA_NUEVA_CENTER
 } from './data/initialData';
 import { EventItem, UserProfile, PlatformMetrics, AiSubagent, EntrepreneurAd } from './types';
@@ -23,6 +24,7 @@ import { ProposeEventModal } from './components/ProposeEventModal';
 import { UserAuthModal } from './components/UserAuthModal';
 import { SocialShareModal } from './components/SocialShareModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
+import { FloatingConcierge } from './components/FloatingConcierge';
 import { DragonRadarLogo } from './components/DragonRadarLogo';
 import { triggerBrowserPushNotification, calculateDistanceKm, LatLng } from './utils/geo';
 import { 
@@ -78,9 +80,11 @@ export default function App() {
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMunicipio, setSelectedMunicipio] = useState<string>('all');
   const [selectedZona, setSelectedZona] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedSourceType, setSelectedSourceType] = useState<'all' | 'radar' | 'municipal'>('all');
+  const [quickFilter, setQuickFilter] = useState<string>('all');
   const [eventDisplayMode, setEventDisplayMode] = useState<'grid' | 'calendar'>('grid');
 
   // Modals
@@ -170,7 +174,7 @@ export default function App() {
           setIsGeoActive(true);
         },
         () => {
-          setUserCoords(VILLA_NUEVA_CENTER);
+          setUserCoords(RADAR_SUR_CENTER);
         },
         { timeout: 5000 }
       );
@@ -190,21 +194,35 @@ export default function App() {
     }
   };
 
-  // Filter events
+  // Filter events across the 3 Municipalities & Moments
   const filteredEvents = events.filter((ev) => {
     const matchesSearch = 
       ev.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ev.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ev.locationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ev.municipio && ev.municipio.toLowerCase().includes(searchQuery.toLowerCase())) ||
       ev.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
 
+    const matchesMunicipio = selectedMunicipio === 'all' || ev.municipio === selectedMunicipio;
     const matchesZona = selectedZona === 'all' || ev.zona === selectedZona;
     const matchesCategory = selectedCategory === 'all' || ev.category === selectedCategory;
     const matchesSource = 
       selectedSourceType === 'all' || 
-      (selectedSourceType === 'radar' && (ev.sourceType === 'radar' || ev.organizer.type === 'Radar Villa Nueva (Exclusivo)')) ||
-      (selectedSourceType === 'municipal' && (ev.sourceType === 'municipal' || ev.organizer.type === 'Alcaldía Villa Nueva'));
+      (selectedSourceType === 'radar' && (ev.sourceType === 'radar' || ev.organizer.type.includes('Radar'))) ||
+      (selectedSourceType === 'municipal' && (ev.sourceType === 'municipal' || ev.organizer.type.includes('Alcaldía')));
 
-    return matchesSearch && matchesZona && matchesCategory && matchesSource;
+    let matchesQuick = true;
+    if (quickFilter === 'free') {
+      matchesQuick = ev.cost.toLowerCase().includes('gratis') || ev.cost.toLowerCase().includes('libre');
+    } else if (quickFilter === 'sports') {
+      matchesQuick = ev.category === 'Deportivo' || ev.tags.some(t => t.toLowerCase().includes('bici') || t.toLowerCase().includes('fútbol'));
+    } else if (quickFilter === 'gastro') {
+      matchesQuick = ev.category === 'Gastronómico' || ev.tags.some(t => t.toLowerCase().includes('gastronomía') || t.toLowerCase().includes('chuchito') || t.toLowerCase().includes('piña') || t.toLowerCase().includes('mango'));
+    } else if (quickFilter === 'weekend') {
+      matchesQuick = ev.isFeatured || ev.capacity > 1000;
+    }
+
+    return matchesSearch && matchesMunicipio && matchesZona && matchesCategory && matchesSource && matchesQuick;
   });
 
   const handleAddEntrepreneurAd = (newAd: EntrepreneurAd) => {
@@ -378,8 +396,12 @@ export default function App() {
           <HeroSection
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            selectedMunicipio={selectedMunicipio}
+            onMunicipioChange={setSelectedMunicipio}
             selectedZona={selectedZona}
             onZonaChange={setSelectedZona}
+            quickFilter={quickFilter}
+            onQuickFilterChange={setQuickFilter}
             onOpenCalendar={() => scrollToSection('calendario')}
             onOpenPropose={() => setIsProposeModalOpen(true)}
             onOpenShareModal={() => scrollToSection('redes-sociales')}
@@ -405,13 +427,13 @@ export default function App() {
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-3 rotate-[-1deg]">
                   <DragonRadarLogo size="sm" />
-                  <span>★ CATÁLOGO · RADAR ★</span>
+                  <span>★ AGENDA SUR · 3 MUNICIPIOS ★</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
-                  Actividades Detectadas en Radar
+                  Actividades Detectadas en Radar Sur
                 </h2>
                 <p className="mt-2 text-black text-sm sm:text-base font-bold">
-                  Explora las actividades familiares, gastronómicas y deportivas en tu colonia con enlaces directos para llegar en Google Maps o Waze.
+                  Explora las actividades familiares, gastronómicas y deportivas en Villa Nueva, San Miguel Petapa y Villa Canales con enlaces directos a Google Maps o Waze.
                 </p>
               </div>
 
@@ -442,15 +464,46 @@ export default function App() {
               </div>
             </div>
 
-            {/* Source Switcher: Radar vs Municipal */}
+            {/* Municipality Selector Chips */}
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t-3 border-black">
               <span className="text-xs font-90s uppercase text-black mr-1 flex items-center gap-1">
-                <Radio className="w-3.5 h-3.5 text-[#FF007F]" /> FUENTE:
+                <MapPin className="w-3.5 h-3.5 text-[#FF007F]" /> MUNICIPIO:
               </span>
               {[
-                { id: 'all', label: 'TODOS LOS EVENTOS' },
-                { id: 'radar', label: '★ EXCLUSIVOS RADAR' },
-                { id: 'municipal', label: '🏛️ MUNICIPALES OFICIALES' },
+                { id: 'all', label: '★ TODO EL SUR' },
+                { id: 'Villa Nueva', label: 'VILLA NUEVA' },
+                { id: 'San Miguel Petapa', label: 'SAN MIGUEL PETAPA' },
+                { id: 'Villa Canales', label: 'VILLA CANALES' },
+              ].map((muni) => {
+                const isActive = selectedMunicipio === muni.id;
+                return (
+                  <button
+                    key={muni.id}
+                    onClick={() => {
+                      setSelectedMunicipio(muni.id);
+                      setSelectedZona('all');
+                    }}
+                    className={`px-3.5 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer ${
+                      isActive
+                        ? 'bg-black text-[#FFE600] shadow-[3px_3px_0_#000] -translate-y-0.5'
+                        : 'bg-white text-black hover:bg-[#FFE600] shadow-[1.5px_1.5px_0_#000]'
+                    }`}
+                  >
+                    {muni.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Source Switcher: Radar vs Municipal */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-90s uppercase text-black mr-1 flex items-center gap-1">
+                <Radio className="w-3.5 h-3.5 text-[#00F0FF]" /> FUENTE:
+              </span>
+              {[
+                { id: 'all', label: 'TODAS LAS FUENTES' },
+                { id: 'radar', label: '★ EXCLUSIVOS RADAR SUR' },
+                { id: 'municipal', label: '🏛️ ALCALDÍAS MUNICIPALES (3)' },
               ].map((src) => {
                 const isActive = selectedSourceType === src.id;
                 return (
@@ -575,13 +628,13 @@ export default function App() {
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-3 rotate-[-1deg]">
                   <CalendarDays className="w-3.5 h-3.5 text-black" />
-                  <span>PLANIFICACIÓN MENSUAL</span>
+                  <span>PLANIFICACIÓN MENSUAL · RADAR SUR</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
-                  Calendario de Actividades en Villa Nueva
+                  Calendario de Actividades del Sur
                 </h2>
                 <p className="mt-2 text-black text-sm sm:text-base font-bold">
-                  Navega por días y fines de semana para planificar tus salidas en familia.
+                  Navega por días y fines de semana para planificar tus salidas familiares en Villa Nueva, San Miguel Petapa y Villa Canales.
                 </p>
               </div>
 
@@ -600,13 +653,13 @@ export default function App() {
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00F0FF] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-3 rotate-[-1deg]">
                   <Sparkles className="w-3.5 h-3.5 text-black" />
-                  <span>TRANSPARENCIA & PARTICIPACIÓN</span>
+                  <span>TRANSPARENCIA & PARTICIPACIÓN SUR</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
                   Impacto en Números
                 </h2>
                 <p className="mt-2 text-black text-sm sm:text-base font-bold">
-                  Datos en tiempo real sobre la afluencia familiar proyectada y participación en las 12 zonas de Villa Nueva.
+                  Datos en tiempo real sobre la afluencia familiar proyectada y participación ciudadana en Villa Nueva, San Miguel Petapa y Villa Canales.
                 </p>
               </div>
 
@@ -630,15 +683,15 @@ export default function App() {
                 <DragonRadarLogo size="md" />
                 <div>
                   <span className="text-xl font-90s text-[#FFE600] block tracking-wide">
-                    RADAR
+                    RADAR SUR
                   </span>
                   <span className="text-[10px] uppercase font-90s tracking-wider text-[#00F0FF] block">
-                    PLATAFORMA OFICIAL DE EVENTOS
+                    ALIANZA INTERMUNICIPAL · 3 MUNICIPIOS
                   </span>
                 </div>
               </div>
               <p className="text-white/80 font-medium leading-relaxed text-xs sm:text-sm max-w-sm">
-                Promoviendo eventos familiares, culturales y gastronómicos en las 12 zonas de Villa Nueva, Guatemala. Rutas directas a Google Maps y Waze, y espacio publicitario para emprendedores locales.
+                Promoviendo eventos familiares, culturales, deportivos y gastronómicos en Villa Nueva, San Miguel Petapa y Villa Canales. Rutas directas en Google Maps y Waze, cupones QR y vitrina comercial para emprendedores del sur.
               </p>
               <div className="flex items-center gap-3">
                 <a 
@@ -646,7 +699,7 @@ export default function App() {
                   target="_blank" 
                   rel="noreferrer" 
                   className="p-2 bg-[#25D366] text-black border-2 border-black font-90s shadow-[2px_2px_0_#FFE600] hover:bg-white transition-colors"
-                  title="WhatsApp Comunitario"
+                  title="WhatsApp Comunitario Radar Sur"
                 >
                   <Share2 className="w-4 h-4" />
                 </a>
@@ -668,7 +721,7 @@ export default function App() {
                 <li><a href="#inicio" onClick={() => scrollToSection('inicio')} className="hover:text-[#FFE600] transition-colors">Inicio</a></li>
                 <li><a href="#como-funciona" onClick={() => scrollToSection('como-funciona')} className="hover:text-[#FFE600] transition-colors">¿Cómo Funciona?</a></li>
                 <li><a href="#eventos" onClick={() => scrollToSection('eventos')} className="hover:text-[#FFE600] transition-colors">Eventos en Radar</a></li>
-                <li><a href="#emprendedores" onClick={() => scrollToSection('emprendedores')} className="hover:text-[#FF007F] text-[#CCFF00] transition-colors">Emprendedores & Ads</a></li>
+                <li><a href="#emprendedores" onClick={() => scrollToSection('emprendedores')} className="hover:text-[#FF007F] text-[#CCFF00] transition-colors">Emprendedores & Cupones QR</a></li>
                 <li><a href="#calendario" onClick={() => scrollToSection('calendario')} className="hover:text-[#FFE600] transition-colors">Calendario Mensual</a></li>
                 <li><a href="#redes-sociales" onClick={() => scrollToSection('redes-sociales')} className="hover:text-[#FFE600] transition-colors">Estudio Social</a></li>
                 <li><a href="#estadisticas" onClick={() => scrollToSection('estadisticas')} className="hover:text-[#FFE600] transition-colors">Impacto & Estadísticas</a></li>
@@ -678,26 +731,46 @@ export default function App() {
             {/* Col 3: Emergency & PMT in 90s style */}
             <div className="md:col-span-4 space-y-3">
               <h4 className="text-xs font-90s uppercase tracking-wider text-[#00F0FF]">
-                ★ EMERGENCIAS & PMT
+                ★ EMERGENCIAS & PMT (3 MUNICIPIOS)
               </h4>
               <div className="space-y-2">
-                <div className="p-3 bg-[#FFE600] text-black border-2 border-black shadow-[3px_3px_0_#FF007F] space-y-1">
-                  <div className="font-90s text-xs flex items-center justify-between">
-                    <span>POLICÍA MUNICIPAL TRÁNSITO (PMT)</span>
-                    <span className="bg-black text-[#FFE600] px-1.5 py-0.5 text-sm">1531</span>
+                <div className="p-2.5 bg-[#FFE600] text-black border-2 border-black shadow-[3px_3px_0_#FF007F] space-y-1">
+                  <div className="font-90s text-[11px] flex items-center justify-between">
+                    <span>PMT VILLA NUEVA</span>
+                    <span className="bg-black text-[#FFE600] px-1.5 py-0.5 text-xs">1531</span>
                   </div>
-                  <p className="text-[11px] font-bold">
-                    Asistencia vial y parqueos en actividades masivas de Villa Nueva.
+                  <p className="text-[10px] font-bold">
+                    Asistencia vial y parqueos en CA-9 y Bulevar Los Reformadores.
                   </p>
                 </div>
 
-                <div className="p-3 bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#00F0FF] space-y-1">
-                  <div className="font-90s text-xs flex items-center justify-between">
-                    <span>BOMBEROS VOLUNTARIOS 29 CÍA.</span>
-                    <span className="bg-black text-white px-1.5 py-0.5 text-sm">122</span>
+                <div className="p-2.5 bg-[#00F0FF] text-black border-2 border-black shadow-[3px_3px_0_#000] space-y-1">
+                  <div className="font-90s text-[11px] flex items-center justify-between">
+                    <span>PMT SAN MIGUEL PETAPA</span>
+                    <span className="bg-black text-[#00F0FF] px-1.5 py-0.5 text-xs">1550</span>
                   </div>
-                  <p className="text-[11px] font-bold">
-                    Cobertura preventiva para festivales y carreras deportivas.
+                  <p className="text-[10px] font-bold">
+                    Control de tránsito en Bulevar El Frutal, Álamos y Villa Hermosa.
+                  </p>
+                </div>
+
+                <div className="p-2.5 bg-[#CCFF00] text-black border-2 border-black shadow-[3px_3px_0_#000] space-y-1">
+                  <div className="font-90s text-[11px] flex items-center justify-between">
+                    <span>PMT VILLA CANALES</span>
+                    <span className="bg-black text-[#CCFF00] px-1.5 py-0.5 text-xs">1545</span>
+                  </div>
+                  <p className="text-[10px] font-bold">
+                    Vigilancia en Boca del Monte, Centro y carretera a Santa Elena Barillas.
+                  </p>
+                </div>
+
+                <div className="p-2.5 bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#00F0FF] space-y-1">
+                  <div className="font-90s text-[11px] flex items-center justify-between">
+                    <span>BOMBEROS VOLUNTARIOS (SUR)</span>
+                    <span className="bg-black text-white px-1.5 py-0.5 text-xs">122</span>
+                  </div>
+                  <p className="text-[10px] font-bold">
+                    29 Cía. Villa Nueva, Petapa y Villa Canales. Cobertura preventiva 24/7.
                   </p>
                 </div>
               </div>
@@ -709,7 +782,7 @@ export default function App() {
           <div className="pt-6 border-t-2 border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-white/70 font-bold">
             <div className="flex items-center gap-2">
               <DragonRadarLogo size="sm" />
-              <span>© 2026 Radar · Villa Nueva, Guatemala.</span>
+              <span>© 2026 RADAR SUR · Villa Nueva · San Miguel Petapa · Villa Canales, Guatemala.</span>
             </div>
             <div className="flex items-center gap-4">
               <button 
@@ -785,6 +858,9 @@ export default function App() {
         }}
         onSuccess={handleAdminAuthSuccess}
       />
+
+      {/* Floating Interactive AI Concierge Widget */}
+      <FloatingConcierge user={user} />
 
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Store, 
   Sparkles, 
@@ -18,10 +18,16 @@ import {
   AlertCircle,
   Zap,
   Flame,
-  Star
+  Star,
+  QrCode,
+  Clock,
+  Ticket,
+  X,
+  Copy
 } from 'lucide-react';
-import { EntrepreneurAd, EntrepreneurCategory, AdSpaceType, VillaNuevaZona, EventItem } from '../types';
+import { EntrepreneurAd, EntrepreneurCategory, AdSpaceType, VillaNuevaZona, MunicipioSur, EventItem } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
+import { ZONAS_BY_MUNICIPIO } from './HeroSection';
 
 interface EntrepreneurAdsSectionProps {
   ads: EntrepreneurAd[];
@@ -34,10 +40,10 @@ const CATEGORIES: { label: string; value: EntrepreneurCategory | 'all' }[] = [
   { label: 'Todos los Emprendimientos', value: 'all' },
   { label: 'Gastronomía & Food Trucks', value: 'Gastronomía & Food Trucks' },
   { label: 'Café & Repostería', value: 'Café, Repostería & Postres' },
-  { label: 'Artesanías & Manualidades', value: 'Artesanías & Hecho a Mano' },
+  { label: 'Artesanías & Hecho a Mano', value: 'Artesanías & Hecho a Mano' },
   { label: 'Moda, Ropa & Calzado', value: 'Moda, Ropa & Calzado' },
-  { label: 'Patrocinadores Oficiales', value: 'Patrocinador Oficial de Evento' },
   { label: 'Servicios & Profesionales', value: 'Servicios Locales & Profesionales' },
+  { label: 'Patrocinadores Oficiales', value: 'Patrocinador Oficial de Evento' },
 ];
 
 const SPACE_TYPES: AdSpaceType[] = [
@@ -45,19 +51,7 @@ const SPACE_TYPES: AdSpaceType[] = [
   'Espacio Food Truck / Remolque',
   'Patrocinio Oficial de Evento (Lonas & Escenario)',
   'Degustación & Muestreo de Producto',
-  'Anuncio Digital en Radar Villa Nueva'
-];
-
-const ZONAS_LIST: VillaNuevaZona[] = [
-  'Zona 1 - Centro Histórico',
-  'Zona 2 - Linda Vista',
-  'Zona 3 - Ciudad del Sol',
-  'Zona 4 - Santa Clara',
-  'Zona 5 - El Frutal',
-  'Zona 6 - Mártires del Pueblo',
-  'Zona 10 - Ciudad Real',
-  'Zona 12 - San José Villa Nueva',
-  'Bárcena & Naciones Unidas',
+  'Anuncio Digital en Radar Sur'
 ];
 
 const SAMPLE_PHOTO_PRESETS = [
@@ -92,10 +86,17 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
   events,
   onSubmitAd,
 }) => {
+  const [selectedMunicipio, setSelectedMunicipio] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<EntrepreneurCategory | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'directory' | 'form'>('directory');
 
+  // Interactive Coupon Modal State
+  const [activeCouponAd, setActiveCouponAd] = useState<EntrepreneurAd | null>(null);
+  const [couponTimerSeconds, setCouponTimerSeconds] = useState<number>(1200); // 20 minutes countdown
+  const [copiedCoupon, setCopiedCoupon] = useState<boolean>(false);
+
   // Form State
+  const [formMunicipio, setFormMunicipio] = useState<MunicipioSur>('Villa Nueva');
   const [businessName, setBusinessName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [category, setCategory] = useState<EntrepreneurCategory>('Gastronomía & Food Trucks');
@@ -106,6 +107,7 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
   const [targetEventId, setTargetEventId] = useState<string>('todos');
   const [productDescription, setProductDescription] = useState('');
   const [specialOffer, setSpecialOffer] = useState('');
+  const [couponCode, setCouponCode] = useState('');
   const [budget, setBudget] = useState('Q350');
   const [imageUrl, setImageUrl] = useState(SAMPLE_PHOTO_PRESETS[0].url);
   const [customImageUrl, setCustomImageUrl] = useState('');
@@ -114,10 +116,27 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
   // Submitted ticket
   const [lastSubmittedAd, setLastSubmittedAd] = useState<EntrepreneurAd | null>(null);
 
+  // Countdown timer for coupon urgency
+  useEffect(() => {
+    if (!activeCouponAd) return;
+    setCouponTimerSeconds(1200); // Reset to 20 minutes on open
+    const interval = setInterval(() => {
+      setCouponTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [activeCouponAd]);
+
+  const formatTimer = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
   // Filtered ads
   const filteredAds = ads.filter((ad) => {
-    if (selectedCategory === 'all') return true;
-    return ad.category === selectedCategory;
+    const matchesMuni = selectedMunicipio === 'all' || ad.municipio === selectedMunicipio;
+    const matchesCat = selectedCategory === 'all' || ad.category === selectedCategory;
+    return matchesMuni && matchesCat;
   });
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -127,21 +146,29 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
     const finalImage = customImageUrl.trim() ? customImageUrl.trim() : imageUrl;
     const selectedEvent = events.find((ev) => ev.id === targetEventId);
 
+    const generatedCode = couponCode.trim() 
+      ? couponCode.trim().toUpperCase() 
+      : `RADAR-${businessName.trim().substring(0, 4).toUpperCase()}${Math.floor(10 + Math.random() * 90)}`;
+
     const newAd: EntrepreneurAd = {
-      id: `ad-vn-${Date.now().toString().slice(-5)}`,
+      id: `ad-sur-${Date.now().toString().slice(-5)}`,
       businessName: businessName.trim(),
-      ownerName: ownerName.trim() || 'Emprendedor Villanovano',
+      ownerName: ownerName.trim() || 'Emprendedor del Sur',
       category,
+      municipio: formMunicipio,
       phone: phone.trim(),
       email: email.trim() || 'contacto@emprendimiento.gt',
       instagramUrl: instagramUrl.trim() || undefined,
       spaceType,
       targetEventId: targetEventId !== 'todos' ? targetEventId : undefined,
-      targetEventTitle: selectedEvent ? selectedEvent.title : 'Todos los eventos en mi zona',
+      targetEventTitle: selectedEvent ? selectedEvent.title : 'Todos los eventos en mi municipio',
       zona,
       productDescription: productDescription.trim(),
       imageUrl: finalImage,
-      specialOffer: specialOffer.trim() || undefined,
+      specialOffer: specialOffer.trim() || '15% de descuento presentando cupón de Radar Sur',
+      couponCode: generatedCode,
+      discountPercentage: 15,
+      couponsLeft: 15,
       status: 'en_revision',
       createdAt: new Date().toISOString().split('T')[0],
       budget: budget.trim() || undefined,
@@ -150,104 +177,86 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
 
     onSubmitAd(newAd);
     setLastSubmittedAd(newAd);
+    setActiveTab('directory');
 
-    // Reset fields
+    // Reset Form
     setBusinessName('');
     setOwnerName('');
     setPhone('');
     setEmail('');
     setProductDescription('');
     setSpecialOffer('');
+    setCouponCode('');
     setCustomImageUrl('');
-    setInstagramUrl('');
   };
 
   const generateWhatsAppInquiryUrl = (ad: EntrepreneurAd) => {
-    const text = encodeURIComponent(
-      `¡Hola ${ad.businessName}! Vi su anuncio en Radar y me interesan sus productos. ¿Podrían brindarme información?`
-    );
     const cleanPhone = ad.phone.replace(/[^0-9]/g, '');
-    return `https://wa.me/${cleanPhone.length === 8 ? '502' + cleanPhone : cleanPhone}?text=${text}`;
+    const phoneWithCountry = cleanPhone.startsWith('502') ? cleanPhone : `502${cleanPhone}`;
+    const text = `¡Hola ${ad.businessName}! Los vi en Radar Sur (${ad.municipio}). Me gustaría consultar información sobre sus productos y promociones especiales.`;
+    return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`;
   };
 
-  const generateSubmitWhatsAppConfirmation = (ad: EntrepreneurAd) => {
-    const text = encodeURIComponent(
-      `¡Hola equipo de Radar! Acabo de postular mi emprendimiento:\n\n` +
-      `🏷️ Negocio: ${ad.businessName}\n` +
-      `👤 Contacto: ${ad.ownerName}\n` +
-      `🎪 Espacio Solicitado: ${ad.spaceType}\n` +
-      `📍 Zona: ${ad.zona}\n` +
-      `🎯 Evento: ${ad.targetEventTitle || 'Todos los eventos'}\n` +
-      `📞 Teléfono: ${ad.phone}\n` +
-      `🆔 Folio: #${ad.id.toUpperCase()}\n\n` +
-      `Deseo coordinar mi stand comercial. ¡Gracias!`
-    );
-    return `https://wa.me/50254128890?text=${text}`;
+  const generateWhatsAppCouponRedeem = (ad: EntrepreneurAd) => {
+    const cleanPhone = ad.phone.replace(/[^0-9]/g, '');
+    const phoneWithCountry = cleanPhone.startsWith('502') ? cleanPhone : `502${cleanPhone}`;
+    const code = ad.couponCode || 'RADAR-SUR15';
+    const text = `¡Hola ${ad.businessName}! Acabo de generar mi Cupón Oficial en Radar Sur (#${code}). Quiero aprovechar el descuento en mi pedido o visita a su stand.`;
+    return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`;
+  };
+
+  const getMuniBadge = (muni?: string) => {
+    switch (muni) {
+      case 'Villa Nueva':
+        return 'bg-[#FFE600] text-black';
+      case 'San Miguel Petapa':
+        return 'bg-[#00F0FF] text-black';
+      case 'Villa Canales':
+        return 'bg-[#CCFF00] text-black';
+      default:
+        return 'bg-white text-black';
+    }
   };
 
   return (
-    <section id="emprendedores" className="py-14 sm:py-20 bg-[#FFFDF0] bg-grid-90s border-b-4 border-black">
+    <section id="emprendedores" className="py-14 sm:py-20 bg-[#FFFDF0] border-b-4 border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        {/* Top Billboard Header */}
-        <div className="bg-[#FFE600] border-4 border-black p-6 sm:p-10 shadow-[8px_8px_0_#000] relative overflow-hidden">
-          {/* Decorative shapes */}
-          <div className="absolute top-2 right-4 text-6xl font-90s opacity-10 select-none pointer-events-none">
-            ★ RADAR ADS ★
-          </div>
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div className="max-w-3xl space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s rotate-[-1deg]">
-                <DragonRadarLogo size="sm" />
-                <span>★ BAZAR & ANUNCIOS · RADAR ★</span>
+        {/* Header Section */}
+        <div className="bg-[#FFE600] border-4 border-black p-6 sm:p-8 shadow-[8px_8px_0_#000]">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="max-w-3xl space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 bg-[#FF007F] text-white font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000]">
+                  ★ RADAR COMERCIAL & EMPRENDEDORES
+                </span>
+                <span className="px-2 py-0.5 bg-black text-[#FFE600] font-90s text-[11px] border border-white">
+                  VILLA NUEVA · PETAPA · VILLA CANALES
+                </span>
               </div>
-
-              <h2 className="text-3xl sm:text-5xl font-90s text-black uppercase tracking-tight leading-tight">
-                Emprendedores & Ads en Villa Nueva
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-90s text-black uppercase tracking-tight leading-tight">
+                Vitrina Comercial & Cupones con Descuento
               </h2>
-
-              <p className="text-black text-sm sm:text-base font-medium leading-relaxed bg-white p-3 border-2 border-black shadow-[3px_3px_0_#000]">
-                <strong>Radar</strong> es una plataforma privada independiente que conecta a miles de familias con actividades de las 12 zonas. Si tienes un food truck, marca artesanal, cafetería o deseas patrocinar una fecha, ¡postula tu anuncio y asegura tu stand comercial!
+              <p className="text-xs sm:text-sm font-bold text-black leading-relaxed">
+                Conectamos a más de 80 microempresarios, food trucks y artesanos del Sur con miles de vecinos. ¡Genera cupones con descuento QR o postula tu stand para los próximos bazares!
               </p>
-
-              <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-90s text-black">
-                <span className="bg-[#00F0FF] px-2.5 py-1 border border-black shadow-[2px_2px_0_#000] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Stands & Food Trucks
-                </span>
-                <span className="bg-[#CCFF00] px-2.5 py-1 border border-black shadow-[2px_2px_0_#000] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Familias Verificadas
-                </span>
-                <span className="bg-white px-2.5 py-1 border border-black shadow-[2px_2px_0_#000] flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Enlaces a WhatsApp & Maps
-                </span>
-              </div>
             </div>
 
-            {/* Quick Toggle Buttons */}
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+            <div className="flex items-center gap-3 shrink-0 flex-wrap">
               <button
-                onClick={() => {
-                  setActiveTab('form');
-                  const formEl = document.getElementById('ad-form-box');
-                  if (formEl) formEl.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="px-6 py-3.5 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-black border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => setActiveTab('form')}
+                className="px-5 py-3 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-black border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>POSTULAR MI NEGOCIO</span>
+                <span>POSTULAR MI MARCA / AD</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('directory')}
-                className={`px-6 py-3.5 text-xs sm:text-sm font-90s border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  activeTab === 'directory'
-                    ? 'bg-white text-black'
-                    : 'bg-[#00F0FF] text-black hover:bg-white'
-                }`}
+                className="px-4 py-3 text-xs sm:text-sm font-90s text-black bg-white hover:bg-[#00F0FF] border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
               >
-                <Store className="w-4 h-4 text-[#FF007F]" />
-                <span>DIRECTORIO ({ads.length})</span>
+                <Store className="w-4 h-4" />
+                <span>VER VITRINA ({ads.length})</span>
               </button>
             </div>
           </div>
@@ -263,10 +272,10 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                 </div>
                 <div>
                   <div className="inline-flex items-center gap-2 text-xs font-90s uppercase text-black">
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF007F]" /> ¡SOLICITUD RECIBIDA CON ÉXITO!
+                    <Sparkles className="w-3.5 h-3.5 text-[#FF007F]" /> ¡SOLICITUD ENVIADA AL RADAR SUR!
                   </div>
                   <h3 className="text-xl sm:text-2xl font-90s text-black uppercase">
-                    ¡Gracias, {lastSubmittedAd.ownerName}! Tu negocio está en el Radar.
+                    ¡Gracias, {lastSubmittedAd.ownerName}! Tu negocio está en proceso de revisión.
                   </h3>
                 </div>
               </div>
@@ -282,29 +291,19 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                 <strong className="text-sm font-90s text-black">{lastSubmittedAd.businessName}</strong>
               </div>
               <div className="p-3 bg-white border-2 border-black shadow-[2px_2px_0_#000]">
-                <span className="text-black/60 block font-bold">Espacio Solicitado:</span>
-                <strong className="text-sm font-90s text-black">{lastSubmittedAd.spaceType}</strong>
+                <span className="text-black/60 block font-bold">Municipio / Zona:</span>
+                <strong className="text-sm font-90s text-black">{lastSubmittedAd.municipio} · {lastSubmittedAd.zona.split(' - ')[0]}</strong>
               </div>
               <div className="p-3 bg-white border-2 border-black shadow-[2px_2px_0_#000]">
-                <span className="text-black/60 block font-bold">Evento:</span>
-                <strong className="text-sm font-90s text-black">{lastSubmittedAd.targetEventTitle || 'Todos en mi zona'}</strong>
+                <span className="text-black/60 block font-bold">Cupón Creado:</span>
+                <strong className="text-sm font-90s text-[#FF007F]">#{lastSubmittedAd.couponCode || 'RADAR-SUR15'}</strong>
               </div>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <a
-                href={generateSubmitWhatsAppConfirmation(lastSubmittedAd)}
-                target="_blank"
-                rel="noreferrer"
-                className="px-5 py-3 text-xs sm:text-sm font-90s text-black bg-[#FFE600] hover:bg-black hover:text-white border-2 border-black shadow-[3px_3px_0_#000] flex items-center gap-2"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>CONFIRMAR POR WHATSAPP AL EQUIPO RADAR</span>
-              </a>
-
               <button
                 onClick={() => setLastSubmittedAd(null)}
-                className="px-4 py-3 text-xs font-90s text-black bg-white hover:bg-slate-200 border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
+                className="px-4 py-2.5 text-xs font-90s text-black bg-white hover:bg-slate-200 border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
               >
                 CERRAR AVISO
               </button>
@@ -312,9 +311,11 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
           </div>
         )}
 
-        {/* Tab Switcher & Category Filter */}
+        {/* Tab Switcher & Municipality Filter */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-3 border-black pb-4">
+            
+            {/* View switcher */}
             <div className="flex items-center gap-2 p-1 bg-white border-2 border-black shadow-[3px_3px_0_#000]">
               <button
                 onClick={() => setActiveTab('directory')}
@@ -325,7 +326,7 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                 }`}
               >
                 <Store className="w-3.5 h-3.5 text-[#FF007F]" />
-                <span>VITRINA COMERCIAL ({filteredAds.length})</span>
+                <span>VITRINA & CUPONES ({filteredAds.length})</span>
               </button>
 
               <button
@@ -341,8 +342,32 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
               </button>
             </div>
 
-            <div className="text-xs font-bold text-black bg-[#CCFF00] px-3 py-1 border-2 border-black shadow-[2px_2px_0_#000]">
-              ★ Espacios disponibles para ferias y bazares en Villa Nueva
+            {/* Municipality Selector Pills */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs font-90s uppercase text-black mr-1 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-[#FF007F]" /> MUNICIPIO:
+              </span>
+              {[
+                { id: 'all', label: 'TODO EL SUR' },
+                { id: 'Villa Nueva', label: 'VILLA NUEVA' },
+                { id: 'San Miguel Petapa', label: 'PETAPA' },
+                { id: 'Villa Canales', label: 'VILLA CANALES' },
+              ].map((muni) => {
+                const isActive = selectedMunicipio === muni.id;
+                return (
+                  <button
+                    key={muni.id}
+                    onClick={() => setSelectedMunicipio(muni.id)}
+                    className={`px-3 py-1 text-xs font-90s border-2 border-black transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-black text-[#FFE600] shadow-[2px_2px_0_#000] -translate-y-0.5'
+                        : 'bg-white text-black hover:bg-[#FFE600] shadow-[1px_1px_0_#000]'
+                    }`}
+                  >
+                    {muni.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -372,7 +397,7 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
           )}
         </div>
 
-        {/* VIEW 1: DIRECTORY OF ENTREPRENEURS & ADS */}
+        {/* VIEW 1: DIRECTORY OF ENTREPRENEURS & CUPONES */}
         {activeTab === 'directory' && (
           <div className="space-y-6">
             {filteredAds.length > 0 ? (
@@ -392,23 +417,15 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
 
-                      {/* Space Type Badge */}
-                      <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 z-10">
-                        <span className="px-2 py-0.5 text-[10px] font-90s uppercase bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0_#000]">
-                          {ad.spaceType.split(' ')[0]} {ad.spaceType.split(' ')[1]}
+                      {/* Top Header Tags */}
+                      <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10">
+                        <span className={`px-2 py-0.5 text-[10px] font-90s uppercase border-2 border-black shadow-[2px_2px_0_#000] ${getMuniBadge(ad.municipio)}`}>
+                          {ad.municipio || 'Sur Metropolitano'}
                         </span>
-                        {ad.verifiedBadge && (
-                          <span className="px-2 py-0.5 text-[10px] font-90s bg-[#CCFF00] text-black border-2 border-black shadow-[2px_2px_0_#000] flex items-center gap-1">
-                            <Award className="w-3 h-3 text-black" /> VERIFICADO
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Status */}
-                      <div className="absolute top-2.5 right-2.5 z-10">
-                        {ad.status === 'destacado' && (
-                          <span className="px-2 py-0.5 text-[10px] font-90s bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000]">
-                            ★ DESTACADO
+                        {ad.discountPercentage && (
+                          <span className="px-2 py-0.5 text-[11px] font-90s bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000] animate-pulse">
+                            ★ {ad.discountPercentage}% OFF
                           </span>
                         )}
                       </div>
@@ -439,57 +456,54 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                           {ad.productDescription}
                         </p>
 
+                        {/* Special Offer Box with Coupon Hook */}
                         {ad.specialOffer && (
-                          <div className="p-2 bg-[#FFE600]/40 border-2 border-black text-black text-xs flex items-start gap-1.5 shadow-[2px_2px_0_#000]">
-                            <Tag className="w-3.5 h-3.5 text-[#FF007F] shrink-0 mt-0.5" />
-                            <span>
-                              <strong>Promoción:</strong> {ad.specialOffer}
-                            </span>
-                          </div>
-                        )}
-
-                        {ad.targetEventTitle && (
-                          <div className="text-[10px] font-90s text-black bg-[#00F0FF]/30 p-2 border border-black truncate">
-                            EN: <strong>{ad.targetEventTitle}</strong>
+                          <div className="p-2.5 bg-[#FFE600]/40 border-2 border-black text-black text-xs space-y-1 shadow-[2px_2px_0_#000]">
+                            <div className="flex items-center gap-1.5 font-90s text-[11px] uppercase text-[#FF007F]">
+                              <Tag className="w-3.5 h-3.5" />
+                              <span>OFERTA ESPECIAL RADAR</span>
+                            </div>
+                            <p className="font-bold text-[11px]">
+                              {ad.specialOffer}
+                            </p>
                           </div>
                         )}
                       </div>
 
-                      {/* Actions: Contact WhatsApp */}
-                      <div className="pt-3 border-t-2 border-black flex items-center gap-2">
-                        <a
-                          href={generateWhatsAppInquiryUrl(ad)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex-1 py-2 px-3 bg-[#CCFF00] hover:bg-[#FFE600] text-black text-xs font-90s border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-1.5"
+                      {/* Actions: Coupon Button & WhatsApp */}
+                      <div className="pt-3 border-t-2 border-black space-y-2">
+                        {/* Interactive Coupon Trigger Button */}
+                        <button
+                          onClick={() => setActiveCouponAd(ad)}
+                          className="w-full py-2.5 px-3 bg-[#FF007F] hover:bg-[#FFE600] hover:text-black text-white text-xs font-90s border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
-                          <MessageCircle className="w-3.5 h-3.5" />
-                          <span>WHATSAPP PEDIDOS</span>
-                        </a>
+                          <QrCode className="w-4 h-4" />
+                          <span>OBTENER CUPÓN CON CÓDIGO QR</span>
+                        </button>
 
-                        {ad.instagramUrl && (
+                        <div className="flex items-center gap-2">
                           <a
-                            href={ad.instagramUrl}
+                            href={generateWhatsAppInquiryUrl(ad)}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-2 text-black bg-white hover:bg-[#FF007F] hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-colors"
-                            title="Ver Instagram"
+                            className="flex-1 py-2 px-3 bg-[#CCFF00] hover:bg-[#00F0FF] text-black text-xs font-90s border-2 border-black shadow-[2px_2px_0_#000] transition-all flex items-center justify-center gap-1.5 text-center"
                           >
-                            <Instagram className="w-4 h-4" />
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>WHATSAPP PEDIDOS</span>
                           </a>
-                        )}
 
-                        {ad.facebookUrl && (
-                          <a
-                            href={ad.facebookUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-2 text-black bg-white hover:bg-[#00F0FF] border-2 border-black shadow-[2px_2px_0_#000] transition-colors"
-                            title="Ver Facebook"
-                          >
-                            <Facebook className="w-4 h-4" />
-                          </a>
-                        )}
+                          {ad.instagramUrl && (
+                            <a
+                              href={ad.instagramUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2 text-black bg-white hover:bg-[#FF007F] hover:text-white border-2 border-black shadow-[2px_2px_0_#000] transition-colors"
+                              title="Instagram"
+                            >
+                              <Instagram className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -499,14 +513,14 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
               <div className="p-12 text-center bg-white border-4 border-black max-w-md mx-auto space-y-3 shadow-[6px_6px_0_#000]">
                 <Store className="w-10 h-10 text-black mx-auto" />
                 <h4 className="text-base font-90s text-black uppercase">
-                  No hay anuncios en esta categoría aún
+                  No hay anuncios en esta sección aún
                 </h4>
                 <p className="text-xs text-black font-medium">
-                  ¡Sé el primer emprendedor en anunciar tu marca en esta sección!
+                  ¡Sé el primer negocio en anunciar tu marca en Radar Sur!
                 </p>
                 <button
                   onClick={() => setActiveTab('form')}
-                  className="px-5 py-2.5 text-xs font-90s bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#000]"
+                  className="px-5 py-2.5 text-xs font-90s bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#000] cursor-pointer"
                 >
                   POSTULAR AHORA ★
                 </button>
@@ -515,20 +529,20 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
           </div>
         )}
 
-        {/* VIEW 2: REGISTRATION FORM ("POSTULA TU EMPRENDIMIENTO / AD") */}
+        {/* VIEW 2: REGISTRATION FORM */}
         {activeTab === 'form' && (
           <div id="ad-form-box" className="bg-white border-4 border-black p-6 sm:p-10 shadow-[8px_8px_0_#000] space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b-3 border-black">
               <div>
                 <div className="inline-flex items-center gap-2 text-xs font-90s uppercase tracking-wider text-[#FF007F]">
                   <DragonRadarLogo size="sm" />
-                  <span>CONVOCATORIA ABIERTA · 12 ZONAS</span>
+                  <span>CONVOCATORIA ABIERTA · VILLA NUEVA · PETAPA · VILLA CANALES</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-90s text-black uppercase mt-1">
-                  Formulario de Postulación de Ads & Stands
+                  Postula tu Negocio, Stand o Food Truck
                 </h3>
                 <p className="text-xs sm:text-sm text-black font-medium">
-                  Registra tu negocio para participar en ferias gastronómicas y bazares comunitarios.
+                  Registra tu marca para aparecer en la vitrina de Radar Sur y en bazares intermunicipales.
                 </p>
               </div>
 
@@ -540,6 +554,44 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
             <form onSubmit={handleFormSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
+                {/* Municipio Selector */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-90s text-black uppercase">
+                    Municipio Sede *
+                  </label>
+                  <select
+                    value={formMunicipio}
+                    onChange={(e) => {
+                      const newMuni = e.target.value as MunicipioSur;
+                      setFormMunicipio(newMuni);
+                      setZona(ZONAS_BY_MUNICIPIO[newMuni][0] as VillaNuevaZona);
+                    }}
+                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-black text-black shadow-[3px_3px_0_#000] focus:outline-none"
+                  >
+                    <option value="Villa Nueva">Villa Nueva</option>
+                    <option value="San Miguel Petapa">San Miguel Petapa</option>
+                    <option value="Villa Canales">Villa Canales</option>
+                  </select>
+                </div>
+
+                {/* Zona Selector (dynamically loaded based on municipality) */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-90s text-black uppercase">
+                    Zona / Colonia de {formMunicipio} *
+                  </label>
+                  <select
+                    value={zona}
+                    onChange={(e) => setZona(e.target.value as VillaNuevaZona)}
+                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-black text-black shadow-[3px_3px_0_#000] focus:outline-none"
+                  >
+                    {ZONAS_BY_MUNICIPIO[formMunicipio].map((z) => (
+                      <option key={z} value={z}>
+                        {z}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Business Name */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-90s text-black uppercase">
@@ -573,28 +625,14 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                 {/* WhatsApp Phone */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-90s text-black uppercase">
-                    WhatsApp de Contacto *
+                    WhatsApp para Pedidos y Canje *
                   </label>
                   <input
                     type="tel"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Ej. 54128890 o +502 5412-8890"
-                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-90s text-black uppercase">
-                    Correo Electrónico
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="contacto@miemprendimiento.gt"
+                    placeholder="Ej. 5412-8890"
                     className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
                   />
                 </div>
@@ -635,163 +673,155 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                   </select>
                 </div>
 
-                {/* Zona */}
+                {/* Special Offer for Neighbors */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-90s text-black uppercase">
-                    Zona de Villa Nueva *
+                    Promoción / Descuento para Vecinos de Radar Sur
                   </label>
-                  <select
-                    value={zona}
-                    onChange={(e) => setZona(e.target.value as VillaNuevaZona)}
-                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-black text-black shadow-[3px_3px_0_#000] focus:outline-none"
-                  >
-                    {ZONAS_LIST.map((z) => (
-                      <option key={z} value={z}>
-                        {z}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    type="text"
+                    value={specialOffer}
+                    onChange={(e) => setSpecialOffer(e.target.value)}
+                    placeholder="Ej. 15% de descuento al mostrar código Radar Sur"
+                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
+                  />
                 </div>
 
-                {/* Target Event of Interest */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-90s text-black uppercase">
-                    Evento de Interés
-                  </label>
-                  <select
-                    value={targetEventId}
-                    onChange={(e) => setTargetEventId(e.target.value)}
-                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-black text-black shadow-[3px_3px_0_#000] focus:outline-none"
-                  >
-                    <option value="todos">★ Todos los eventos en mi zona</option>
-                    {events.map((ev) => (
-                      <option key={ev.id} value={ev.id}>
-                        {ev.sourceType === 'radar' ? '[RADAR]' : '[MUNICIPAL]'} {ev.title} ({ev.date})
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               {/* Product Description */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-90s text-black uppercase">
-                  Descripción de Productos y Propuesta *
+                  Descripción del Producto o Servicio *
                 </label>
                 <textarea
                   required
                   rows={3}
                   value={productDescription}
                   onChange={(e) => setProductDescription(e.target.value)}
-                  placeholder="Detalla qué vendes, si necesitas electricidad 110v o agua, y qué hace especial a tu producto..."
+                  placeholder="Describe tus especialidades, qué incluye tu stand y qué te hace único en el Sur..."
                   className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
                 />
               </div>
 
-              {/* Special Offer & Social Link */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-90s text-black uppercase">
-                    Promo para Usuarios de Radar (Opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={specialOffer}
-                    onChange={(e) => setSpecialOffer(e.target.value)}
-                    placeholder="Ej. 10% de descuento al mostrar código Radar"
-                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
-                  />
+              {/* Submit CTA */}
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t-3 border-black">
+                <div className="text-xs font-bold text-black flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#FF007F]" />
+                  <span>Validado y resguardado para la comunidad del Sur</span>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-90s text-black uppercase">
-                    Instagram o Enlace Web (Opcional)
-                  </label>
-                  <input
-                    type="url"
-                    value={instagramUrl}
-                    onChange={(e) => setInstagramUrl(e.target.value)}
-                    placeholder="https://instagram.com/tu_marca"
-                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
-                  />
-                </div>
-              </div>
-
-              {/* Photo Selector for Ad */}
-              <div className="space-y-3 pt-2">
-                <label className="block text-xs font-90s text-black uppercase">
-                  Foto de Portada de tu Emprendimiento
-                </label>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                  {SAMPLE_PHOTO_PRESETS.map((preset) => (
-                    <button
-                      type="button"
-                      key={preset.name}
-                      onClick={() => {
-                        setImageUrl(preset.url);
-                        setCustomImageUrl('');
-                      }}
-                      className={`relative aspect-[4/3] border-3 text-left transition-all cursor-pointer ${
-                        imageUrl === preset.url && !customImageUrl
-                          ? 'border-black ring-3 ring-[#FF007F] shadow-[4px_4px_0_#000]'
-                          : 'border-black/50 opacity-70 hover:opacity-100'
-                      }`}
-                    >
-                      <img
-                        src={preset.url}
-                        alt={preset.name}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                      />
-                      <span className="absolute bottom-1 inset-x-1 text-[9px] font-90s text-white bg-black/80 px-1 py-0.5 truncate block">
-                        {preset.name}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="pt-2">
-                  <input
-                    type="url"
-                    value={customImageUrl}
-                    onChange={(e) => setCustomImageUrl(e.target.value)}
-                    placeholder="O pega aquí una URL directa de tu imagen/logo..."
-                    className="w-full px-4 py-2.5 text-xs bg-white border-2 border-black font-bold text-black shadow-[2px_2px_0_#000]"
-                  />
-                </div>
-              </div>
-
-              {/* Submit Buttons Row */}
-              <div className="pt-4 border-t-3 border-black flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-xs font-bold text-black flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 text-[#FF007F] shrink-0" />
-                  <span>Tu postulación pasará a evaluación técnica de logística Radar.</span>
-                </div>
-
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('directory')}
-                    className="w-full sm:w-auto px-5 py-3 text-xs font-90s text-black bg-white hover:bg-slate-200 border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
-                  >
-                    CANCELAR
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="w-full sm:w-auto px-6 py-3.5 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-black border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>ENVIAR SOLICITUD ★</span>
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-8 py-4 bg-[#FFE600] hover:bg-[#FF007F] hover:text-white text-black font-90s text-sm border-3 border-black shadow-[5px_5px_0_#000] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>ENVIAR SOLICITUD AL RADAR SUR ★</span>
+                </button>
               </div>
             </form>
           </div>
         )}
 
       </div>
+
+      {/* INTERACTIVE COUPON MODAL WITH COUNTDOWN TIMER & QR */}
+      {activeCouponAd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-[#FFE600] border-4 border-black shadow-[10px_10px_0_#000] p-6 sm:p-8 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b-3 border-black pb-4">
+              <div className="flex items-center gap-2">
+                <DragonRadarLogo size="sm" />
+                <div>
+                  <span className="text-[10px] font-90s uppercase bg-[#FF007F] text-white px-2 py-0.5 border border-black block">
+                    CUPÓN EXCLUSIVO RADAR SUR
+                  </span>
+                  <h3 className="text-lg font-90s text-black uppercase mt-0.5">
+                    {activeCouponAd.businessName}
+                  </h3>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setActiveCouponAd(null)}
+                className="p-1.5 bg-white hover:bg-black hover:text-white border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Urgency Countdown Bar */}
+            <div className="bg-black text-white p-3 border-2 border-black flex items-center justify-between text-xs font-90s shadow-[3px_3px_0_#000]">
+              <div className="flex items-center gap-2 text-[#FFE600]">
+                <Clock className="w-4 h-4 animate-spin text-[#FF007F]" />
+                <span>VALIDEZ TEMPORAL:</span>
+              </div>
+              <span className="bg-[#FF007F] text-white px-2.5 py-0.5 border border-white text-sm font-mono tracking-wider">
+                {formatTimer(couponTimerSeconds)}
+              </span>
+            </div>
+
+            {/* QR and Code Box */}
+            <div className="bg-white border-3 border-black p-5 text-center space-y-3 shadow-[4px_4px_0_#000]">
+              <div className="w-40 h-40 bg-[#FFFDF0] border-2 border-black p-2 mx-auto shadow-[3px_3px_0_#000] flex items-center justify-center">
+                <QrCode className="w-full h-full text-black" />
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-[11px] font-bold text-black/70 uppercase">
+                  CÓDIGO DE CANJE:
+                </div>
+                <div className="inline-flex items-center gap-2 bg-[#FFE600] px-3 py-1 border-2 border-black font-mono font-black text-sm text-black shadow-[2px_2px_0_#000]">
+                  <span>{activeCouponAd.couponCode || 'RADAR-SUR15'}</span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard?.writeText(activeCouponAd.couponCode || 'RADAR-SUR15');
+                      setCopiedCoupon(true);
+                      setTimeout(() => setCopiedCoupon(false), 2000);
+                    }}
+                    className="p-0.5 hover:text-[#FF007F] cursor-pointer"
+                    title="Copiar código"
+                  >
+                    {copiedCoupon ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-xs font-black text-black">
+                {activeCouponAd.specialOffer || '15% de descuento al mostrar este código'}
+              </p>
+              
+              <div className="text-[10px] font-bold text-black/60 pt-1 border-t border-black/10">
+                Ubicación: {activeCouponAd.municipio} ({activeCouponAd.zona}) · Cupón personal
+              </div>
+            </div>
+
+            {/* CTAs */}
+            <div className="space-y-2">
+              <a
+                href={generateWhatsAppCouponRedeem(activeCouponAd)}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-3 px-4 bg-[#CCFF00] hover:bg-black hover:text-[#CCFF00] text-black font-90s text-xs border-3 border-black shadow-[4px_4px_0_#000] flex items-center justify-center gap-2 transition-all"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>CANJEAR POR WHATSAPP CON EL NEGOCIO</span>
+              </a>
+
+              <button
+                onClick={() => setActiveCouponAd(null)}
+                className="w-full py-2.5 px-4 bg-white hover:bg-slate-200 text-black font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
+              >
+                GUARDAR Y CERRAR
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };

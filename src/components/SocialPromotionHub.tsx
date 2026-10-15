@@ -46,13 +46,13 @@ export const SocialPromotionHub: React.FC<SocialPromotionHubProps> = ({
   const getShareCopy = (platform: string) => {
     switch (platform) {
       case 'whatsapp':
-        return `★ ¡ACTIVIDAD DETECTADA EN RADAR! ★\n\n🎉 *${currentEvent.title}*\n🗓️ *Fecha:* ${currentEvent.date} (${currentEvent.time})\n📍 *Lugar:* ${currentEvent.locationName} (${currentEvent.zona})\n🎟️ *Entrada:* ${currentEvent.cost}\n\n${currentEvent.shortSummary}\n\n🗺️ *Cómo llegar (Google Maps):* ${mapsLink}\n👉 *Pase gratuito en:* ${eventLink}\n\n#Radar #VillaNueva #Guatemala #EventosFamiliares`;
+        return `★ ¡ACTIVIDAD DETECTADA EN RADAR SUR! ★\n\n🎉 *${currentEvent.title}*\n🗓️ *Fecha:* ${currentEvent.date} (${currentEvent.time})\n📍 *Lugar:* ${currentEvent.locationName} (${currentEvent.zona}, ${currentEvent.municipio})\n🎟️ *Entrada:* ${currentEvent.cost}\n\n${currentEvent.shortSummary}\n\n🗺️ *Cómo llegar (Google Maps):* ${mapsLink}\n👉 *Pase gratuito en:* ${eventLink}\n\n#RadarSur #${currentEvent.municipio.replace(/\s+/g, '')} #Guatemala #EventosFamiliares`;
       case 'instagram':
-        return `¡Radar detectó una actividad imperdible! ★✨ Este ${currentEvent.date} viviremos "${currentEvent.title}" en ${currentEvent.locationName}.\n\nAmbiente 100% familiar y seguro. ¡Guarda esta publicación y pasa la voz a tus vecinos!\n\n📍 Ruta Google Maps: ${mapsLink}\n🔗 Pase libre en el portal.\n\n#Radar #Eventos #Cultura #Guatemala`;
+        return `¡Radar Sur detectó un plan imperdible! ★✨ Este ${currentEvent.date} viviremos "${currentEvent.title}" en ${currentEvent.locationName} (${currentEvent.municipio}).\n\nAmbiente 100% familiar y seguro. ¡Guarda esta publicación y pasa la voz a tus vecinos!\n\n📍 Ruta Google Maps: ${mapsLink}\n🔗 Pase libre en Radar Sur.\n\n#RadarSur #${currentEvent.municipio.replace(/\s+/g, '')} #Eventos #Cultura #Guatemala`;
       case 'facebook':
-        return `¡Alerta comunitaria Radar! ★🇬🇹\n\nEste ${currentEvent.date} se llevará a cabo "${currentEvent.title}" en ${currentEvent.locationName} (${currentEvent.zona}).\n\nVen con toda tu familia. Entrada: ${currentEvent.cost}.\n\n🗺️ Cómo llegar con Google Maps: ${mapsLink}\n🎟️ Pase libre y detalles en: ${eventLink}\n\n¡Comparte con tus amigos y vecinos!`;
+        return `¡Alerta comunitaria Radar Sur! ★🇬🇹\n\nEste ${currentEvent.date} se llevará a cabo "${currentEvent.title}" en ${currentEvent.locationName} (${currentEvent.zona}, ${currentEvent.municipio}).\n\nVen con toda tu familia. Entrada: ${currentEvent.cost}.\n\n🗺️ Cómo llegar con Google Maps: ${mapsLink}\n🎟️ Pase libre y detalles en: ${eventLink}\n\n¡Comparte con tus amigos y vecinos!`;
       case 'twitter':
-        return `★ ¡Evento en el Radar! "${currentEvent.title}" el ${currentEvent.date} en ${currentEvent.locationName}, Villa Nueva. ${currentEvent.cost}. Ruta Maps: ${mapsLink} #Radar`;
+        return `★ ¡Evento en Radar Sur! "${currentEvent.title}" el ${currentEvent.date} en ${currentEvent.locationName}, ${currentEvent.municipio}. ${currentEvent.cost}. Ruta Maps: ${mapsLink} #RadarSur`;
       default:
         return '';
     }

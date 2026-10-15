@@ -9,7 +9,8 @@ import {
   MapPin,
   CheckCircle2,
   Zap,
-  Store
+  Store,
+  QrCode
 } from 'lucide-react';
 import { DragonRadarLogo } from './DragonRadarLogo';
 
@@ -27,9 +28,9 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
   const steps = [
     {
       number: '01',
-      title: 'Detección en tu Zona',
-      description: 'Escaneo y catálogo de actividades municipales y exclusivas en las 12 zonas de Villa Nueva.',
-      badge: '★ ESCANEO LOCAL',
+      title: '3 Municipios Unidos',
+      description: 'Catálogo unificado de actividades de las alcaldías de Villa Nueva, San Miguel Petapa y Villa Canales, más eventos Radar.',
+      badge: '★ ALIANZA SUR',
       cardBg: 'bg-[#FFE600]',
       btnBg: 'bg-white hover:bg-black hover:text-white',
       bgImage: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=600&q=80',
@@ -38,9 +39,9 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
     },
     {
       number: '02',
-      title: 'Google Maps & Waze',
-      description: 'Cada ficha cuenta con coordenadas precisas, ruta directa en Waze/Maps y parqueos verificados.',
-      badge: '★ RUTA EN VIVO',
+      title: 'Google Maps & 3 PMT',
+      description: 'Coordenadas GPS exactas, rutas en Waze/Maps e información de parqueos y cierres viales de las 3 Policías Municipales.',
+      badge: '★ RUTAS & TRÁFICO',
       cardBg: 'bg-[#00F0FF]',
       btnBg: 'bg-[#FFE600] hover:bg-black hover:text-white',
       bgImage: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80',
@@ -49,28 +50,28 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
     },
     {
       number: '03',
-      title: 'Difusión Social',
-      description: 'Flyers automáticos listos para WhatsApp, Instagram Stories y Facebook en 1 clic.',
-      badge: '★ VIRALIZA TU ZONA',
+      title: 'Cupones con Código QR',
+      description: 'Descuentos exclusivos (15% a 25%) para canjear en restaurantes, food trucks y tiendas del Sur con código QR en tu celular.',
+      badge: '★ DESCUENTOS EN VIVO',
+      cardBg: 'bg-[#CCFF00]',
+      btnBg: 'bg-black text-white hover:bg-[#FF007F]',
+      bgImage: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=600&q=80',
+      actionText: 'Canjear Cupones',
+      action: () => {
+        const el = document.getElementById('emprendedores');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      },
+    },
+    {
+      number: '04',
+      title: 'Difusión Comunitaria',
+      description: 'Genera flyers automáticos y mensajes listos para compartir con tus vecinos en grupos de WhatsApp e Instagram.',
+      badge: '★ PASA LA VOZ',
       cardBg: 'bg-[#FF007F] text-white',
       btnBg: 'bg-[#FFE600] text-black hover:bg-white',
       bgImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80',
       actionText: 'Crear Flyers',
       action: onOpenShareModal,
-    },
-    {
-      number: '04',
-      title: 'Bazar & Emprendedores',
-      description: 'Postula tu negocio o food truck para colocar tu stand en las ferias y bazares de Villa Nueva.',
-      badge: '★ ESPACIO COMERCIAL',
-      cardBg: 'bg-[#CCFF00]',
-      btnBg: 'bg-black text-white hover:bg-[#FF007F]',
-      bgImage: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80',
-      actionText: 'Unirse al Bazar',
-      action: () => {
-        const el = document.getElementById('emprendedores');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      },
     },
   ];
 
@@ -82,15 +83,15 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
         <div className="max-w-3xl mb-10 sm:mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-3 rotate-[-1deg]">
             <DragonRadarLogo size="sm" />
-            <span>GUÍA RÁPIDA · RADAR</span>
+            <span>GUÍA RÁPIDA · RADAR SUR</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
-            ¿Cómo Funciona el Radar y Cómo te Conecta?
+            ¿Cómo Funciona Radar Sur y Cómo te Conecta?
           </h2>
 
           <p className="mt-3 text-sm sm:text-base text-black font-medium leading-relaxed bg-[#FFFDF0] p-3 border-2 border-black shadow-[3px_3px_0_#000]">
-            <strong>Radar</strong> conecta a los vecinos con actividades reales, coordinadas con la PMT para acceso vial y con enlaces directos para no perderte ningún festival.
+            <strong>Radar Sur</strong> unifica la agenda de <strong>Villa Nueva</strong>, <strong>San Miguel Petapa</strong> y <strong>Villa Canales</strong> en un solo portal cívico e interactivo para fortalecer la convivencia vecinal y el comercio de barrio.
           </p>
         </div>
 
@@ -128,17 +129,17 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
               {/* Content Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-1.5">
-                  <h3 className="text-lg font-90s leading-snug">
+                  <h3 className="text-base sm:text-lg font-90s uppercase leading-tight">
                     {step.title}
                   </h3>
-                  <p className="text-xs sm:text-sm font-medium leading-relaxed opacity-90">
+                  <p className="text-xs font-bold leading-relaxed opacity-90">
                     {step.description}
                   </p>
                 </div>
 
                 <button
                   onClick={step.action}
-                  className={`w-full py-2 px-3 text-xs font-90s border-2 border-black shadow-[3px_3px_0_#000] flex items-center justify-center gap-1.5 transition-all cursor-pointer ${step.btnBg}`}
+                  className={`w-full py-2.5 px-3 text-xs font-90s border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-1.5 cursor-pointer ${step.btnBg}`}
                 >
                   <span>{step.actionText}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -146,29 +147,6 @@ export const HowItWorksSection: React.FC<HowItWorksProps> = ({
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Commitment Strip in 90s Danger / Caution Pattern */}
-        <div className="mt-10 p-5 sm:p-6 bg-[#FFE600] border-4 border-black shadow-[6px_6px_0_#000] flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 text-xs font-90s text-black">
-              <Zap className="w-4 h-4 text-[#FF007F]" />
-              <span>GARANTÍA 100% VILLA NUEVA · COORDENADAS PMT</span>
-            </div>
-            <h4 className="text-xl sm:text-2xl font-90s text-black uppercase">
-              Rutas Exactas a Google Maps y Waze
-            </h4>
-            <p className="text-xs sm:text-sm text-black font-medium">
-              Todo evento cuenta con botón directo de navegación y datos de estacionamiento verificado.
-            </p>
-          </div>
-
-          <button
-            onClick={onExploreEvents}
-            className="px-6 py-3 bg-[#FF007F] hover:bg-black text-white font-90s text-xs uppercase border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all cursor-pointer shrink-0"
-          >
-            VER CATÁLOGO HOY ★
-          </button>
         </div>
 
       </div>

@@ -35,7 +35,18 @@ export const EventCard: React.FC<EventCardProps> = ({
   const occupancyPercent = Math.min(100, Math.round((event.rsvpCount / event.capacity) * 100));
 
   const googleMapsUrl = event.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${event.coordinates.lat},${event.coordinates.lng}`;
-  const isRadarEvent = event.sourceType === 'radar' || event.organizer.type === 'Radar Villa Nueva (Exclusivo)';
+  const getMuniBadge = (muni: string) => {
+    switch (muni) {
+      case 'Villa Nueva':
+        return 'bg-[#FFE600] text-black';
+      case 'San Miguel Petapa':
+        return 'bg-[#00F0FF] text-black';
+      case 'Villa Canales':
+        return 'bg-[#CCFF00] text-black';
+      default:
+        return 'bg-white text-black';
+    }
+  };
 
   return (
     <div className="neo-card flex flex-col justify-between overflow-hidden group">
@@ -51,34 +62,37 @@ export const EventCard: React.FC<EventCardProps> = ({
           />
         ) : (
           <div className="w-full h-full bg-[#FFE600] flex items-center justify-center font-90s text-xl text-black">
-            RADAR
+            RADAR SUR
           </div>
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
         {/* Top Header Tags */}
-        <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10">
-          <div className="flex items-center gap-1 bg-[#FFE600] text-black px-2 py-0.5 border-2 border-black shadow-[2px_2px_0_#000] text-[10px] font-90s uppercase">
-            <span>{event.category}</span>
-            <span>·</span>
-            <span>{event.zona.split(' - ')[0]}</span>
+        <div className="absolute top-2.5 inset-x-2.5 flex items-center justify-between z-10 gap-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={`px-2 py-0.5 border-2 border-black shadow-[2px_2px_0_#000] text-[10px] font-90s uppercase ${getMuniBadge(event.municipio)}`}>
+              {event.municipio}
+            </span>
+            <span className="bg-white text-black px-1.5 py-0.5 border border-black text-[10px] font-90s uppercase">
+              {event.category}
+            </span>
           </div>
 
-          <span className="px-2.5 py-0.5 text-xs font-90s bg-[#00F0FF] text-black border-2 border-black shadow-[2px_2px_0_#000]">
+          <span className="px-2 py-0.5 text-xs font-90s bg-[#00F0FF] text-black border-2 border-black shadow-[2px_2px_0_#000]">
             {event.cost}
           </span>
         </div>
 
         {/* Source Badge */}
-        <div className="absolute top-10 left-2.5 z-10">
+        <div className="absolute top-11 left-2.5 z-10">
           {isRadarEvent ? (
-            <span className="px-2 py-0.5 text-[10px] font-90s uppercase bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000] rotate-[-2deg] inline-block">
-              ★ EXCLUSIVO RADAR
+            <span className="px-2 py-0.5 text-[10px] font-90s uppercase bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000] rotate-[-1deg] inline-block">
+              ★ EXCLUSIVO RADAR SUR
             </span>
           ) : (
             <span className="px-2 py-0.5 text-[10px] font-90s uppercase bg-white text-black border-2 border-black shadow-[2px_2px_0_#000] inline-block">
-              🏛 MUNICIPAL
+              🏛️ {event.organizer.type}
             </span>
           )}
         </div>

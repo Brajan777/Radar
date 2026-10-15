@@ -11,8 +11,9 @@ import {
   Wand2,
   Zap
 } from 'lucide-react';
-import { EventItem, EventCategory, VillaNuevaZona, UserProfile } from '../types';
+import { EventItem, EventCategory, SurZona, MunicipioSur, UserProfile } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
+import { ZONAS_BY_MUNICIPIO } from './HeroSection';
 
 interface ProposeEventModalProps {
   isOpen: boolean;
@@ -20,18 +21,6 @@ interface ProposeEventModalProps {
   user: UserProfile;
   onSubmitEvent: (newEvent: EventItem) => void;
 }
-
-const ZONAS_LIST: VillaNuevaZona[] = [
-  'Zona 1 - Centro Histórico',
-  'Zona 2 - Linda Vista',
-  'Zona 3 - Ciudad del Sol',
-  'Zona 4 - Santa Clara',
-  'Zona 5 - El Frutal',
-  'Zona 6 - Mártires del Pueblo',
-  'Zona 10 - Ciudad Real',
-  'Zona 12 - San José Villa Nueva',
-  'Bárcena & Naciones Unidas',
-];
 
 const CATEGORIES: EventCategory[] = [
   'Familiar',
@@ -53,7 +42,8 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
 
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<EventCategory>('Familiar');
-  const [zona, setZona] = useState<VillaNuevaZona>('Zona 1 - Centro Histórico');
+  const [municipio, setMunicipio] = useState<MunicipioSur>('Villa Nueva');
+  const [zona, setZona] = useState<SurZona>(ZONAS_BY_MUNICIPIO['Villa Nueva'][0]);
   const [date, setDate] = useState('2026-11-05');
   const [time, setTime] = useState('09:00 AM - 02:00 PM');
   const [locationName, setLocationName] = useState('');
@@ -68,6 +58,14 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
   const [isCurating, setIsCurating] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<any | null>(null);
 
+  const handleMunicipioChange = (newMuni: MunicipioSur) => {
+    setMunicipio(newMuni);
+    const availableZonas = ZONAS_BY_MUNICIPIO[newMuni];
+    if (availableZonas && availableZonas.length > 0) {
+      setZona(availableZonas[0]);
+    }
+  };
+
   const handleGenerateImageWithNanoBanana = async () => {
     setIsGeneratingImg(true);
     try {
@@ -75,7 +73,7 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `${title || 'Feria comunitaria'} en ${zona}, Villa Nueva`,
+          prompt: `${title || 'Feria comunitaria'} en ${zona}, ${municipio}`,
         }),
       });
       const data = await res.json();
@@ -103,6 +101,7 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
         body: JSON.stringify({
           title,
           category,
+          municipio,
           zona,
           roughDescription: description,
         }),
@@ -131,18 +130,36 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
       .map((s) => s.trim())
       .filter(Boolean);
 
-    // Default coordinates based on zona
+    // Calculate coordinates based on municipio and zona
     let lat = 14.5262;
     let lng = -90.5878;
-    if (zona.includes('Frutal')) { lat = 14.5098; lng = -90.5694; }
-    else if (zona.includes('Santa Clara')) { lat = 14.5360; lng = -90.5750; }
-    else if (zona.includes('Naciones Unidas')) { lat = 14.4842; lng = -90.5985; }
-    else if (zona.includes('Ciudad Real')) { lat = 14.5610; lng = -90.5615; }
+    if (municipio === 'San Miguel Petapa') {
+      lat = 14.5015;
+      lng = -90.5590;
+      if (zona.includes('Frutal') || zona.includes('Álamos')) {
+        lat = 14.5120;
+        lng = -90.5650;
+      }
+    } else if (municipio === 'Villa Canales') {
+      lat = 14.4830;
+      lng = -90.5330;
+      if (zona.includes('Boca del Monte')) {
+        lat = 14.5420;
+        lng = -90.5180;
+      }
+    } else {
+      // Villa Nueva
+      if (zona.includes('Frutal')) { lat = 14.5098; lng = -90.5694; }
+      else if (zona.includes('Santa Clara')) { lat = 14.5360; lng = -90.5750; }
+      else if (zona.includes('Naciones Unidas') || zona.includes('Bárcena')) { lat = 14.4842; lng = -90.5985; }
+      else if (zona.includes('Ciudad Real')) { lat = 14.5610; lng = -90.5615; }
+    }
 
     const newEvent: EventItem = {
       id: `ev-user-${Date.now()}`,
       title,
       category,
+      municipio,
       zona,
       date,
       time,
@@ -152,22 +169,24 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
       shortSummary: description.substring(0, 110) + '...',
       organizer: {
         name: user.name,
-        role: user.role === 'admin' ? 'Coordinador Municipal' : 'Vecino Proponente',
+        role: user.role === 'admin' ? `Coordinador (${municipio})` : 'Vecino Proponente',
         verified: user.role === 'admin',
-        type: user.role === 'admin' ? 'Alcaldía Villa Nueva' : 'Colectivo Vecinal',
+        type: user.role === 'admin' ? `Alcaldía ${municipio}` : 'Colectivo Vecinal',
       },
-      targetAudience: 'Familias y vecinos de Villa Nueva',
+      targetAudience: `Familias y vecinos de ${municipio} y Radar Sur`,
       cost,
       capacity: Number(capacity) || 200,
       rsvpCount: 1,
       isFeatured: false,
       status: user.role === 'admin' ? 'Aprobado' : 'En Revisión',
-      tags: [category, 'Comunidad', 'VillaNueva'],
+      tags: [category, 'Comunidad', municipio.replace(/\s+/g, ''), 'RadarSur'],
       amenities: amenitiesList.length > 0 ? amenitiesList : ['Seguridad PMT', 'Área Familiar'],
       gradientTheme: 'from-amber-600 via-orange-600 to-rose-700',
       accentColor: '#f59e0b',
       iconName: 'Sparkles',
       imageUrl: eventImage,
+      mapsUrl: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+      wazeUrl: `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
     };
 
     onSubmitEvent(newEvent);
@@ -240,8 +259,36 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
             />
           </div>
 
-          {/* Category & Zona */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Municipio, Zona & Categoria */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <label className="text-black font-90s uppercase block">Municipio *</label>
+              <select
+                value={municipio}
+                onChange={(e) => handleMunicipioChange(e.target.value as MunicipioSur)}
+                className="w-full px-3 py-2 text-xs text-black font-black bg-[#FFE600] border-2 border-black shadow-[2px_2px_0_#000] focus:outline-none"
+              >
+                <option value="Villa Nueva">Villa Nueva</option>
+                <option value="San Miguel Petapa">San Miguel Petapa</option>
+                <option value="Villa Canales">Villa Canales</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-black font-90s uppercase block">Zona / Sector *</label>
+              <select
+                value={zona}
+                onChange={(e) => setZona(e.target.value as SurZona)}
+                className="w-full px-3 py-2 text-xs text-black font-black bg-white border-2 border-black shadow-[2px_2px_0_#000] focus:outline-none"
+              >
+                {ZONAS_BY_MUNICIPIO[municipio]?.map((z) => (
+                  <option key={z} value={z}>
+                    {z}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="space-y-1">
               <label className="text-black font-90s uppercase block">Categoría *</label>
               <select
@@ -252,21 +299,6 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-black font-90s uppercase block">Zona de Villa Nueva *</label>
-              <select
-                value={zona}
-                onChange={(e) => setZona(e.target.value as VillaNuevaZona)}
-                className="w-full px-3 py-2 text-xs text-black font-black bg-white border-2 border-black shadow-[2px_2px_0_#000] focus:outline-none"
-              >
-                {ZONAS_LIST.map((z) => (
-                  <option key={z} value={z}>
-                    {z}
                   </option>
                 ))}
               </select>
