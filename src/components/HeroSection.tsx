@@ -176,28 +176,28 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </p>
             </div>
 
-            {/* Action Buttons: 90s Neo-Brutalist Buttons */}
+            {/* Action Buttons: 90s Neo-Brutalist Buttons with Bouncy Transitions */}
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={onScrollToEvents}
-                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#FFE600] hover:bg-[#FF007F] hover:text-white border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#FFE600] hover:bg-[#FF007F] hover:text-white border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Radio className="w-4 h-4" />
+                <Radio className="w-4 h-4 animate-pulse text-[#FF007F]" />
                 <span>DESCUBRIR PLANES DEL SUR</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
 
               <button
                 onClick={onOpenPropose}
-                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#00F0FF] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#00F0FF] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-4 h-4 text-black" />
                 <span>PROPONER ACTIVIDAD</span>
               </button>
 
               <button
                 onClick={onOpenCalendar}
-                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#CCFF00] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#CCFF00] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
                 <span>CALENDARIO</span>
@@ -205,9 +205,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
               <a
                 href="#emprendedores"
-                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-[#FFE600] hover:text-black border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-[#FFE600] hover:text-black border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Store className="w-4 h-4" />
+                <Store className="w-4 h-4 animate-bounce" />
                 <span>CUPONES & ADS</span>
               </a>
             </div>
@@ -333,7 +333,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </span>
             </div>
 
-            {/* Quick Municipality Filter Tabs */}
+            {/* Quick Municipality Filter Tabs with Lively Bounce */}
             <div className="flex items-center gap-1.5 flex-wrap">
               {[
                 { id: 'all', label: '★ TODO EL SUR', color: 'bg-black text-[#FFE600]' },
@@ -349,9 +349,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                       onMunicipioChange(muni.id);
                       onZonaChange('all');
                     }}
-                    className={`px-3 py-1 text-xs font-90s border-2 border-black transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 text-xs font-90s border-2 border-black transition-bounce cursor-pointer hover-lift ${
                       isActive 
-                        ? `${muni.color} shadow-[3px_3px_0_#000] -translate-y-0.5` 
+                        ? `${muni.color} shadow-[3px_3px_0_#000] scale-105` 
                         : 'bg-white text-black hover:bg-slate-100 shadow-[1.5px_1.5px_0_#000]'
                     }`}
                   >

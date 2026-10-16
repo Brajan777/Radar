@@ -85,12 +85,15 @@ export const FloatingConcierge: React.FC<FloatingConciergeProps> = ({ user }) =>
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 left-6 z-40 bg-[#FFE600] hover:bg-[#FF007F] hover:text-white text-black px-4 py-3 border-3 border-black shadow-[5px_5px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2.5 font-90s text-xs cursor-pointer group"
+          className="fixed bottom-6 left-6 z-40 bg-[#FFE600] hover:bg-[#FF007F] hover:text-white text-black px-4 py-3 border-3 border-black shadow-[5px_5px_0_#000] hover-lift transition-bounce animate-float-slow flex items-center gap-2.5 font-90s text-xs cursor-pointer group"
           title="Pregúntale al Concierge Ciudadano de Radar Sur"
         >
           <DragonRadarLogo size="sm" />
-          <span className="uppercase">CONCIERGE SUR IA</span>
-          <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] border border-black animate-ping" />
+          <span className="uppercase tracking-wider">CONCIERGE SUR IA</span>
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00F0FF] opacity-80" />
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-[#FF007F] border border-black" />
+          </span>
         </button>
       )}
 

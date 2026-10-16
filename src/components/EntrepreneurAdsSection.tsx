@@ -476,10 +476,10 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                         {/* Interactive Coupon Trigger Button */}
                         <button
                           onClick={() => setActiveCouponAd(ad)}
-                          className="w-full py-2.5 px-3 bg-[#FF007F] hover:bg-[#FFE600] hover:text-black text-white text-xs font-90s border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          className="w-full py-2.5 px-3 bg-[#FF007F] hover:bg-[#FFE600] hover:text-black text-white text-xs font-90s border-2 border-black shadow-[3px_3px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
                         >
-                          <QrCode className="w-4 h-4" />
-                          <span>OBTENER CUPÓN CON CÓDIGO QR</span>
+                          <QrCode className="w-4 h-4 animate-pulse" />
+                          <span>OBTENER CUPÓN CON CÓDIGO QR ★</span>
                         </button>
 
                         <div className="flex items-center gap-2">

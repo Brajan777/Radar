@@ -50,7 +50,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   };
 
   return (
-    <div className="neo-card flex flex-col justify-between overflow-hidden group">
+    <div className="neo-card hover-lift transition-bounce flex flex-col justify-between overflow-hidden group">
       {/* Photo Banner with 90s Retro Overlays */}
       <div className="relative h-48 sm:h-52 w-full overflow-hidden border-b-3 border-black bg-black">
         {event.imageUrl && !imgError ? (
@@ -59,7 +59,7 @@ export const EventCard: React.FC<EventCardProps> = ({
             alt={event.title}
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
           />
         ) : (
           <div className="w-full h-full bg-[#FFE600] flex items-center justify-center font-90s text-xl text-black">
@@ -88,7 +88,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         {/* Source Badge */}
         <div className="absolute top-11 left-2.5 z-10">
           {isRadarEvent ? (
-            <span className="px-2 py-0.5 text-[10px] font-90s uppercase bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000] rotate-[-1deg] inline-block">
+            <span className="px-2 py-0.5 text-[10px] font-90s uppercase bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000] rotate-[-1deg] inline-block animate-pulse">
               ★ EXCLUSIVO RADAR SUR
             </span>
           ) : (
@@ -193,13 +193,13 @@ export const EventCard: React.FC<EventCardProps> = ({
           <div className="flex items-center gap-2 pt-1">
             <button
               onClick={() => onSelect(event)}
-              className="flex-1 py-2 text-xs font-90s text-black bg-[#00F0FF] hover:bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all text-center cursor-pointer"
+              className="flex-1 py-2 text-xs font-90s text-black bg-[#00F0FF] hover:bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] hover-lift transition-bounce text-center cursor-pointer"
             >
               DETALLES ★
             </button>
             <button
               onClick={() => onRsvp(event)}
-              className="flex-1 py-2 text-xs font-90s text-white bg-[#FF007F] hover:bg-black border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center justify-center gap-1 cursor-pointer"
+              className="flex-1 py-2 text-xs font-90s text-white bg-[#FF007F] hover:bg-black border-2 border-black shadow-[3px_3px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-1 cursor-pointer"
             >
               <Ticket className="w-3.5 h-3.5" />
               <span>PASE GRATIS</span>
@@ -207,7 +207,7 @@ export const EventCard: React.FC<EventCardProps> = ({
             {onShare && (
               <button
                 onClick={() => onShare(event)}
-                className="p-2 text-black bg-white hover:bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all cursor-pointer"
+                className="p-2 text-black bg-white hover:bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] hover-lift transition-bounce cursor-pointer"
                 title="Difundir en WhatsApp y Redes"
               >
                 <Share2 className="w-4 h-4" />
