@@ -199,8 +199,8 @@ export default function App() {
     const matchesCategory = selectedCategory === 'all' || ev.category === selectedCategory;
     const matchesSource = 
       selectedSourceType === 'all' || 
-      (selectedSourceType === 'radar' && (ev.sourceType === 'radar' || ev.organizer.type.includes('Radar'))) ||
-      (selectedSourceType === 'municipal' && (ev.sourceType === 'municipal' || ev.organizer.type.includes('Alcaldía')));
+      (selectedSourceType === 'radar' && (ev.sourceType === 'radar' || ev.organizer?.type?.includes('Radar'))) ||
+      (selectedSourceType === 'municipal' && (ev.sourceType === 'municipal' || ev.organizer?.type?.includes('Alcaldía')));
 
     let matchesQuick = true;
     if (quickFilter === 'free') {
