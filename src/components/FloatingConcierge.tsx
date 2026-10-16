@@ -79,22 +79,82 @@ export const FloatingConcierge: React.FC<FloatingConciergeProps> = ({ user }) =>
     }
   };
 
+  const [showNotification, setShowNotification] = useState(true);
+
   return (
     <>
-      {/* Floating Launcher Pill Button */}
+      {/* Floating Radar & Incoming Agent Notification Bubble */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 left-6 z-40 bg-[#FFE600] hover:bg-[#FF007F] hover:text-white text-black px-4 py-3 border-3 border-black shadow-[5px_5px_0_#000] hover-lift transition-bounce animate-float-slow flex items-center gap-2.5 font-90s text-xs cursor-pointer group"
-          title="Pregúntale al Concierge Ciudadano de Radar Sur"
-        >
-          <DragonRadarLogo size="sm" />
-          <span className="uppercase tracking-wider">CONCIERGE SUR IA</span>
-          <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00F0FF] opacity-80" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-[#FF007F] border border-black" />
-          </span>
-        </button>
+        <div className="fixed bottom-6 left-5 z-40 flex flex-col items-start gap-2.5 max-w-[290px] sm:max-w-xs select-none">
+          
+          {/* Speech Bubble / Notification from the Agent */}
+          {showNotification && (
+            <div className="relative bg-[#FFFDF0] border-3 border-black p-3.5 shadow-[5px_5px_0_#000] animate-in fade-in slide-in-from-bottom-3 duration-300 space-y-2">
+              {/* Bubble pointer triangle pointing down towards the radar */}
+              <div className="absolute -bottom-2.5 left-6 w-4 h-4 bg-[#FFFDF0] border-r-3 border-b-3 border-black rotate-45" />
+
+              <div className="flex items-center justify-between gap-2 border-b-2 border-black pb-1.5">
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF66] opacity-80" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00FF66] border border-black" />
+                  </span>
+                  <span className="text-[10px] font-90s uppercase text-black tracking-wider">
+                    ★ AGENTE RADAR SUR EN VIVO
+                  </span>
+                </div>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNotification(false);
+                  }}
+                  className="text-slate-400 hover:text-black p-0.5"
+                  title="Cerrar notificación"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <p className="text-xs font-bold text-black leading-snug">
+                ¡Hola vecino! 🎯 Te invito al <strong>Festival del Chuchito</strong> y actividades familiares este fin de semana en el Sur. ¿Quieres que te pase rutas y parqueos PMT?
+              </p>
+
+              <button
+                onClick={() => {
+                  setIsOpen(true);
+                  setShowNotification(false);
+                }}
+                className="w-full py-1.5 px-3 bg-[#FFE600] hover:bg-[#FF007F] hover:text-white text-black font-90s text-[11px] uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all flex items-center justify-center gap-1.5 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>¡VER INVITACIÓN!</span>
+              </button>
+            </div>
+          )}
+
+          {/* Floating Round Dragon Radar ONLY */}
+          <button
+            onClick={() => {
+              setIsOpen(true);
+              setShowNotification(false);
+            }}
+            className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#FFE600] hover:bg-[#00F0FF] border-3 sm:border-4 border-black shadow-[5px_5px_0_#000] flex items-center justify-center cursor-pointer transition-all hover:scale-110 active:scale-95 animate-float-slow group"
+            title="Toca el Radar para hablar con el Agente de Radar Sur"
+          >
+            <DragonRadarLogo size="md" />
+
+            {/* Notification Badge */}
+            {showNotification && (
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 sm:h-6 sm:w-6">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF007F] opacity-75" />
+                <span className="relative inline-flex rounded-full h-5 w-5 sm:h-6 sm:w-6 bg-[#FF007F] border-2 border-black text-white text-[10px] sm:text-xs font-black items-center justify-center shadow-[1px_1px_0_#000]">
+                  1
+                </span>
+              </span>
+            )}
+          </button>
+        </div>
       )}
 
       {/* Floating Chat Modal */}

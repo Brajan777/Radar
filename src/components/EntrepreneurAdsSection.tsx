@@ -233,10 +233,10 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
     <section id="emprendedores" className="py-14 sm:py-20 bg-[#FFFDF0] border-b-4 border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         
-        {/* Header Section */}
-        <div className="bg-[#FFE600] border-4 border-black p-6 sm:p-8 shadow-[8px_8px_0_#000]">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="max-w-3xl space-y-2">
+        {/* Header Section with Distinct Buttons and Detailed Coupon Explanation */}
+        <div className="bg-[#FFE600] border-4 border-black p-6 sm:p-8 shadow-[8px_8px_0_#000] space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+            <div className="max-w-3xl space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="px-2.5 py-0.5 bg-[#FF007F] text-white font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000]">
                   ★ RADAR COMERCIAL & EMPRENDEDORES
@@ -249,11 +249,20 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                 Vitrina Comercial & Cupones con Descuento
               </h2>
               <p className="text-xs sm:text-sm font-bold text-black leading-relaxed">
-                Conectamos a más de 80 microempresarios, food trucks y artesanos del Sur con miles de vecinos. ¡Genera cupones con descuento QR o postula tu stand para los próximos bazares!
+                Conectamos a más de 80 microempresarios, food trucks y artesanos del Sur con miles de vecinos. ¡Los negocios otorgan descuentos especiales limitados para darse a conocer y atraer nuevos clientes a sus stands y pedidos!
               </p>
+
+              {/* Crucial Rule Banner: 1 coupon per person */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-black text-[#FFE600] border-2 border-black font-90s text-xs shadow-[3px_3px_0_#FF007F]">
+                <AlertCircle className="w-4 h-4 text-[#FF007F] shrink-0 animate-pulse" />
+                <span>REGLA: SOLO 1 CUPÓN POR PERSONA (USO ÚNICO · NO SE PUEDE REPETIR)</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0 flex-wrap">
+            {/* 3 Distinctly Styled Action Buttons */}
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+              
+              {/* Button 1: Portal de Negocios (Dark Neo-Brutalist Gold Accent) */}
               <button
                 onClick={() => {
                   if (onOpenBusinessPortal) {
@@ -262,28 +271,91 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                     window.location.hash = '#negocio';
                   }
                 }}
-                className="px-4 py-3 text-xs sm:text-sm font-90s text-black bg-[#CCFF00] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
+                className="px-4 py-3 bg-black hover:bg-neutral-900 text-[#FFE600] border-3 border-black shadow-[4px_4px_0_#CCFF00] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 transition-all flex items-center gap-3 cursor-pointer text-left group"
                 title="Acceso para dueños de negocios para ver y canjear cupones"
               >
-                <Store className="w-4 h-4 text-[#FF007F]" />
-                <span>SOY NEGOCIO / MI PORTAL ★</span>
+                <div className="w-9 h-9 bg-[#CCFF00] text-black border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0_#fff] group-hover:scale-105 transition-transform">
+                  <Store className="w-5 h-5 text-black" />
+                </div>
+                <div>
+                  <span className="block font-90s text-xs uppercase leading-tight text-[#CCFF00]">
+                    SOY NEGOCIO / MI PORTAL
+                  </span>
+                  <span className="text-[10px] text-white font-bold block">
+                    Acceder & canjear cupones en vivo →
+                  </span>
+                </div>
               </button>
 
+              {/* Button 2: Postular Marca (Hot Magenta Punchy CTA) */}
               <button
                 onClick={() => setActiveTab('form')}
-                className="px-5 py-3 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-black border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
+                className="px-4 py-3 bg-[#FF007F] hover:bg-black text-white border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 transition-all flex items-center gap-3 cursor-pointer text-left group"
               >
-                <PlusCircle className="w-4 h-4" />
-                <span>POSTULAR MI MARCA / AD</span>
+                <div className="w-9 h-9 bg-white text-[#FF007F] border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0_#000] group-hover:rotate-12 transition-transform">
+                  <PlusCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="block font-90s text-xs uppercase leading-tight text-white">
+                    POSTULAR MI MARCA / AD
+                  </span>
+                  <span className="text-[10px] text-white/90 font-bold block">
+                    Stand en bazares & vitrina digital
+                  </span>
+                </div>
               </button>
 
+              {/* Button 3: Ver Vitrina (Electric Cyan Directory) */}
               <button
                 onClick={() => setActiveTab('directory')}
-                className="px-4 py-3 text-xs sm:text-sm font-90s text-black bg-white hover:bg-[#00F0FF] border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
+                className="px-4 py-3 bg-[#00F0FF] hover:bg-white text-black border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 transition-all flex items-center gap-3 cursor-pointer text-left group"
               >
-                <Store className="w-4 h-4" />
-                <span>VER VITRINA ({ads.length})</span>
+                <div className="w-9 h-9 bg-[#FFE600] text-black border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0_#000] group-hover:scale-105 transition-transform">
+                  <Ticket className="w-5 h-5 text-[#FF007F]" />
+                </div>
+                <div>
+                  <span className="block font-90s text-xs uppercase leading-tight text-black">
+                    VER VITRINA & CUPONES
+                  </span>
+                  <span className="text-[10px] text-black/80 font-bold block">
+                    {ads.length} emprendimientos disponibles
+                  </span>
+                </div>
               </button>
+
+            </div>
+          </div>
+
+          {/* Educational 3-Step Banner: How Discounts and 1-Coupon-Per-Person Rule Work */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-4 border-t-3 border-black">
+            <div className="p-3.5 bg-white border-2 border-black shadow-[3px_3px_0_#000] space-y-1">
+              <div className="flex items-center gap-2 font-90s text-xs text-black">
+                <span className="w-5 h-5 bg-[#FFE600] border border-black flex items-center justify-center text-[10px] shrink-0">1</span>
+                <span>DESCUENTOS PARA NUEVOS CLIENTES</span>
+              </div>
+              <p className="text-[11px] font-bold text-slate-800 leading-snug">
+                Los comercios ofrecen promociones con descuento (15% al 50% OFF) de manera limitada para que los vecinos los conozcan y compren por primera vez.
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#000] space-y-1">
+              <div className="flex items-center gap-2 font-90s text-xs text-white">
+                <span className="w-5 h-5 bg-black text-[#FFE600] border border-white flex items-center justify-center text-[10px] shrink-0">2</span>
+                <span>SOLO 1 CUPÓN POR PERSONA</span>
+              </div>
+              <p className="text-[11px] font-bold text-white leading-snug">
+                <strong>No se puede repetir.</strong> Cada persona puede redimir únicamente 1 cupón por negocio, garantizando que el beneficio llegue a nuevos clientes.
+              </p>
+            </div>
+
+            <div className="p-3.5 bg-[#00F0FF] text-black border-2 border-black shadow-[3px_3px_0_#000] space-y-1">
+              <div className="flex items-center gap-2 font-90s text-xs text-black">
+                <span className="w-5 h-5 bg-[#CCFF00] border border-black flex items-center justify-center text-[10px] shrink-0">3</span>
+                <span>CONTROL & CANJE DIRECTO</span>
+              </div>
+              <p className="text-[11px] font-bold text-black leading-snug">
+                Muestras tu cupón QR en el stand o lo envías por WhatsApp. El negocio valida el código en su portal y descuenta el stock en tiempo real.
+              </p>
             </div>
           </div>
         </div>
