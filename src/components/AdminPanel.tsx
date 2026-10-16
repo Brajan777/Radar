@@ -26,11 +26,22 @@ import {
   Upload,
   Camera,
   Image as ImageIcon,
-  CheckCircle2
+  CheckCircle2,
+  Database,
+  RefreshCw,
+  Copy,
+  Key,
+  Layers
 } from 'lucide-react';
 import { EventItem, UserProfile, EventCategory, SurZona, MunicipioSur, EntrepreneurAd, AdSpaceType } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
 import { ZONAS_BY_MUNICIPIO } from './HeroSection';
+import { 
+  getSupabaseConfig, 
+  saveSupabaseCredentials, 
+  clearSupabaseCredentials, 
+  testSupabaseConnection 
+} from '../lib/supabase';
 
 interface AdminPanelProps {
   events: EventItem[];
@@ -41,6 +52,7 @@ interface AdminPanelProps {
   onCreateEvent: (newEvent: EventItem) => void;
   onUpdateAd?: (updatedAd: EntrepreneurAd) => void;
   onDeleteAd?: (adId: string) => void;
+  onSyncSupabase?: () => Promise<void>;
 }
 
 const CATEGORIES: EventCategory[] = [
@@ -62,6 +74,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onCreateEvent,
   onUpdateAd,
   onDeleteAd,
+  onSyncSupabase,
 }) => {
   const [adminTab, setAdminTab] = useState<'events' | 'ads' | 'users' | 'subagents'>('events');
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
@@ -69,6 +82,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [adFilterStatus, setAdFilterStatus] = useState<string>('all');
   const [showManualUrl, setShowManualUrl] = useState(false);
+
+  // Supabase states
+  const [supabaseConfig, setSupabaseConfig] = useState(getSupabaseConfig());
+  const [showSupabaseSettings, setShowSupabaseSettings] = useState(false);
+  const [inputUrl, setInputUrl] = useState(supabaseConfig.url || '');
+  const [inputKey, setInputKey] = useState(supabaseConfig.key || '');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const [copiedSql, setCopiedSql] = useState(false);
 
   const showStatus = (msg: string) => {
     setStatusMessage(msg);
@@ -426,6 +449,232 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <option value="contactado">Contactados</option>
               </select>
             </div>
+          </div>
+
+          {/* Supabase Database Connection & Sync Banner */}
+          <div className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 bg-slate-50/70 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl border ${
+                  supabaseConfig.isConfigured 
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-amber-100 text-amber-900 border-amber-300'
+                }`}>
+                  <Database className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-sm font-bold text-slate-900">
+                      Base de Datos de Emprendedores (Supabase)
+                    </h4>
+                    {supabaseConfig.isConfigured ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-600 text-white">
+                        ● Conectado ({supabaseConfig.source === 'env' ? 'Vercel / .env' : 'Config Local'})
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-white">
+                        ● Modo Local (Faltan credenciales)
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    {supabaseConfig.isConfigured
+                      ? `Conectado a: ${supabaseConfig.url} · Las solicitudes de emprendedores se guardan en vivo.`
+                      : 'Las solicitudes se guardan temporalmente en memoria. Conecta tu proyecto de Supabase para almacenar la data permanentemente.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {onSyncSupabase && (
+                  <button
+                    onClick={async () => {
+                      setIsSyncing(true);
+                      await onSyncSupabase();
+                      setIsSyncing(false);
+                      showStatus('Sincronización con Supabase finalizada.');
+                    }}
+                    disabled={isSyncing}
+                    className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Cargar registros más recientes desde Supabase"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSyncing ? 'animate-spin' : ''}`} />
+                    <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar'}</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={async () => {
+                    setIsTesting(true);
+                    setTestResult(null);
+                    const res = await testSupabaseConnection();
+                    setIsTesting(false);
+                    setTestResult(res.message);
+                    showStatus(res.message);
+                  }}
+                  disabled={isTesting}
+                  className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Probar conexión con Supabase"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{isTesting ? 'Probando...' : 'Probar Conexión'}</span>
+                </button>
+
+                <button
+                  onClick={() => setShowSupabaseSettings(prev => !prev)}
+                  className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer ${
+                    showSupabaseSettings 
+                      ? 'bg-blue-600 text-white border-blue-700' 
+                      : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300'
+                  }`}
+                >
+                  <Key className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Credenciales</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const sqlCode = `-- SQL para Supabase (Tabla de Emprendedores)
+CREATE TABLE IF NOT EXISTS public.entrepreneurs (
+    id TEXT PRIMARY KEY,
+    business_name TEXT NOT NULL,
+    owner_name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    municipio TEXT NOT NULL DEFAULT 'Villa Nueva',
+    phone TEXT NOT NULL,
+    email TEXT NOT NULL,
+    instagram_url TEXT,
+    space_type TEXT NOT NULL DEFAULT 'Stand Comercial en Feria / Bazar',
+    target_event_id TEXT,
+    target_event_title TEXT,
+    zona TEXT NOT NULL,
+    product_description TEXT NOT NULL,
+    image_url TEXT NOT NULL,
+    special_offer TEXT,
+    coupon_code TEXT,
+    discount_percentage INTEGER DEFAULT 15,
+    coupons_left INTEGER DEFAULT 15,
+    status TEXT NOT NULL DEFAULT 'en_revision' CHECK (status IN ('aprobado', 'en_revision', 'destacado', 'contactado')),
+    budget TEXT,
+    verified_badge BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+ALTER TABLE public.entrepreneurs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Permitir registro publico" ON public.entrepreneurs;
+CREATE POLICY "Permitir registro publico" ON public.entrepreneurs FOR INSERT TO anon, authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir lectura publica" ON public.entrepreneurs;
+CREATE POLICY "Permitir lectura publica" ON public.entrepreneurs FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Permitir actualizacion" ON public.entrepreneurs;
+CREATE POLICY "Permitir actualizacion" ON public.entrepreneurs FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Permitir eliminacion" ON public.entrepreneurs;
+CREATE POLICY "Permitir eliminacion" ON public.entrepreneurs FOR DELETE TO anon, authenticated USING (true);`;
+                    navigator.clipboard?.writeText(sqlCode);
+                    setCopiedSql(true);
+                    showStatus('¡Script SQL copiado al portapapeles! Pégalo en el SQL Editor de Supabase.');
+                    setTimeout(() => setCopiedSql(false), 3000);
+                  }}
+                  className="px-3 py-1.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Copiar script SQL para crear la tabla en Supabase"
+                >
+                  <Copy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{copiedSql ? '¡SQL Copiado!' : 'Copiar SQL'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Test Result Message Box */}
+            {testResult && (
+              <div className="p-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{testResult}</span>
+              </div>
+            )}
+
+            {/* Supabase Settings Form */}
+            {showSupabaseSettings && (
+              <div className="p-4 bg-white border-2 border-blue-200 rounded-2xl space-y-4 animate-in fade-in duration-150">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <div className="text-xs font-bold text-blue-900 uppercase flex items-center gap-1.5">
+                    <Key className="w-4 h-4 text-amber-500" />
+                    <span>Configurar Credenciales de Supabase</span>
+                  </div>
+                  <button
+                    onClick={() => setShowSupabaseSettings(false)}
+                    className="text-slate-400 hover:text-slate-600 text-xs font-bold"
+                  >
+                    ✕ Cerrar
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">
+                      Project URL (VITE_SUPABASE_URL):
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://xyzabcdefg.supabase.co"
+                      value={inputUrl}
+                      onChange={(e) => setInputUrl(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-xs text-slate-900 focus:outline-blue-500 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700 block">
+                      Anon Public Key (VITE_SUPABASE_ANON_KEY):
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={inputKey}
+                      onChange={(e) => setInputKey(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-xs text-slate-900 focus:outline-blue-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                  <span>💡 Encuentra estos valores en tu panel de Supabase: <strong>Project Settings → API</strong>.</span>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                  <button
+                    onClick={async () => {
+                      if (!inputUrl.trim() || !inputKey.trim()) {
+                        showStatus('Por favor ingresa tanto la URL como la Anon Key de Supabase.');
+                        return;
+                      }
+                      saveSupabaseCredentials(inputUrl.trim(), inputKey.trim());
+                      const updated = getSupabaseConfig();
+                      setSupabaseConfig(updated);
+                      showStatus('¡Credenciales de Supabase guardadas con éxito!');
+                      if (onSyncSupabase) {
+                        await onSyncSupabase();
+                      }
+                      setShowSupabaseSettings(false);
+                    }}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  >
+                    Guardar y Conectar
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      clearSupabaseCredentials();
+                      setInputUrl('');
+                      setInputKey('');
+                      setSupabaseConfig(getSupabaseConfig());
+                      showStatus('Credenciales locales limpiadas.');
+                    }}
+                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {filteredAds.length > 0 ? (

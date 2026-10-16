@@ -28,6 +28,13 @@ import { FloatingConcierge } from './components/FloatingConcierge';
 import { DragonRadarLogo } from './components/DragonRadarLogo';
 import { triggerBrowserPushNotification, calculateDistanceKm, LatLng } from './utils/geo';
 import { 
+  saveEntrepreneurToSupabase, 
+  fetchEntrepreneursFromSupabase, 
+  updateEntrepreneurStatusInSupabase, 
+  deleteEntrepreneurFromSupabase,
+  getSupabaseConfig 
+} from './lib/supabase';
+import { 
   Filter, 
   Calendar, 
   MapPin, 
@@ -216,17 +223,82 @@ export default function App() {
     return matchesSearch && matchesMunicipio && matchesZona && matchesCategory && matchesSource && matchesQuick;
   });
 
-  const handleAddEntrepreneurAd = (newAd: EntrepreneurAd) => {
+  // Sincronización automática de emprendedores registrados en Supabase
+  useEffect(() => {
+    let isMounted = true;
+    const syncFromSupabase = async () => {
+      try {
+        const { success, ads } = await fetchEntrepreneursFromSupabase();
+        if (isMounted && success && ads.length > 0) {
+          setEntrepreneurAds(prev => {
+            const map = new Map<string, EntrepreneurAd>();
+            prev.forEach(ad => map.set(ad.id, ad));
+            ads.forEach(ad => map.set(ad.id, ad));
+            return Array.from(map.values());
+          });
+        }
+      } catch (err) {
+        console.warn('Sincronización con Supabase no completada:', err);
+      }
+    };
+    syncFromSupabase();
+    return () => { isMounted = false; };
+  }, []);
+
+  const handleSyncSupabase = async () => {
+    try {
+      const { success, ads, error } = await fetchEntrepreneursFromSupabase();
+      if (success) {
+        if (ads.length > 0) {
+          setEntrepreneurAds(prev => {
+            const map = new Map<string, EntrepreneurAd>();
+            prev.forEach(ad => map.set(ad.id, ad));
+            ads.forEach(ad => map.set(ad.id, ad));
+            return Array.from(map.values());
+          });
+        }
+        showToast(`⚡ ¡Sincronizado con Supabase! ${ads.length} solicitudes activas.`);
+      } else {
+        showToast(`Aviso Supabase: ${error || 'Verifica tus credenciales en el panel.'}`);
+      }
+    } catch (err: any) {
+      showToast(`Error de conexión con Supabase: ${err?.message || 'Revisa tu conexión'}`);
+    }
+  };
+
+  const handleAddEntrepreneurAd = async (newAd: EntrepreneurAd) => {
+    // 1. Actualización optimista inmediata en memoria
     setEntrepreneurAds(prev => [newAd, ...prev]);
-    showToast(`¡Solicitud para "${newAd.businessName}" enviada con éxito! Folio: #${newAd.id.toUpperCase()}`);
+
+    // 2. Persistencia en Supabase
+    try {
+      const result = await saveEntrepreneurToSupabase(newAd);
+      if (result.isStoredInSupabase) {
+        showToast(`⚡ ¡Guardado en Supabase! Solicitud de "${newAd.businessName}" registrada (Folio: #${newAd.id.toUpperCase()})`);
+      } else {
+        showToast(`¡Solicitud para "${newAd.businessName}" registrada! Folio: #${newAd.id.toUpperCase()}`);
+      }
+    } catch {
+      showToast(`¡Solicitud para "${newAd.businessName}" registrada con éxito!`);
+    }
   };
 
-  const handleUpdateEntrepreneurAd = (updatedAd: EntrepreneurAd) => {
+  const handleUpdateEntrepreneurAd = async (updatedAd: EntrepreneurAd) => {
     setEntrepreneurAds(prev => prev.map(ad => ad.id === updatedAd.id ? updatedAd : ad));
+    try {
+      await updateEntrepreneurStatusInSupabase(updatedAd.id, updatedAd.status, updatedAd.verifiedBadge);
+    } catch (err) {
+      console.warn('No se pudo actualizar estado en Supabase:', err);
+    }
   };
 
-  const handleDeleteEntrepreneurAd = (adId: string) => {
+  const handleDeleteEntrepreneurAd = async (adId: string) => {
     setEntrepreneurAds(prev => prev.filter(ad => ad.id !== adId));
+    try {
+      await deleteEntrepreneurFromSupabase(adId);
+    } catch (err) {
+      console.warn('No se pudo eliminar en Supabase:', err);
+    }
   };
 
   // Handle RSVP
@@ -376,6 +448,7 @@ export default function App() {
             onCreateEvent={handleProposeEvent}
             onUpdateAd={handleUpdateEntrepreneurAd}
             onDeleteAd={handleDeleteEntrepreneurAd}
+            onSyncSupabase={handleSyncSupabase}
           />
         </div>
       )}

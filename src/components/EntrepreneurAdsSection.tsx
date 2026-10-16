@@ -23,7 +23,8 @@ import {
   Clock,
   Ticket,
   X,
-  Copy
+  Copy,
+  Database
 } from 'lucide-react';
 import { EntrepreneurAd, EntrepreneurCategory, AdSpaceType, VillaNuevaZona, MunicipioSur, EventItem } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
@@ -706,9 +707,15 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
 
               {/* Submit CTA */}
               <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t-3 border-black">
-                <div className="text-xs font-bold text-black flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#FF007F]" />
-                  <span>Validado y resguardado para la comunidad del Sur</span>
+                <div className="space-y-1">
+                  <div className="text-xs font-90s text-black flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#FF007F]" />
+                    <span>ALIANZA INTERMUNICIPAL · RADAR SUR</span>
+                  </div>
+                  <div className="text-[11px] font-bold text-black/70 flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Conectado a Base de Datos Supabase (recepción en tiempo real)</span>
+                  </div>
                 </div>
 
                 <button

@@ -115,6 +115,32 @@ Radar/
 
 ---
 
+## 🗄️ 4. Conexión con Base de Datos Supabase (Recolección de Emprendedores)
+
+La plataforma cuenta con integración oficial con **Supabase** (`@supabase/supabase-js`) para recolectar y almacenar las solicitudes de emprendedores que desean unirse a los bazares y actividades intermunicipales.
+
+### 4.1. Configuración de Credenciales
+Puedes configurar Supabase de dos maneras:
+1. **En Vercel (Recomendado para producción):**
+   - Ve a tu proyecto en Vercel -> *Settings* -> *Environment Variables*.
+   - Agrega:
+     - `VITE_SUPABASE_URL`: Tu URL de proyecto (ej: `https://xyz.supabase.co`)
+     - `VITE_SUPABASE_ANON_KEY`: Tu clave pública `anon`
+2. **Desde el Panel de Administración (En vivo sin redesplegar):**
+   - Abre el Panel de Administración (`#admin` o atajo `Ctrl + Shift + A`).
+   - Ve a la pestaña **Ads de Emprendedores**.
+   - Haz clic en **Credenciales**, ingresa tu URL y Anon Key, y haz clic en **Guardar y Conectar**.
+
+### 4.2. Creación de la Tabla en Supabase
+El repositorio incluye el archivo [`supabase_schema.sql`](file:///c:/Proyectos/Radar/supabase_schema.sql):
+1. Entra a tu proyecto en [https://supabase.com](https://supabase.com).
+2. Haz clic en **SQL Editor** en el menú izquierdo.
+3. Copia el contenido de [`supabase_schema.sql`](file:///c:/Proyectos/Radar/supabase_schema.sql) (o usa el botón **Copiar SQL** en el Panel Admin).
+4. Pégalo en el editor y presiona **RUN**.
+5. ¡Listo! La tabla `entrepreneurs` quedará configurada con políticas RLS de lectura y escritura pública.
+
+---
+
 ## 🚀 5. Instrucciones de Ejecución
 
 ### Inicio Rápido
