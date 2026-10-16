@@ -116,12 +116,14 @@ export interface EntrepreneurAd {
   galleryImages?: string[];
   specialOffer?: string;
   status: 'aprobado' | 'en_revision' | 'destacado' | 'contactado';
-  createdAt: string;
   budget?: string;
   verifiedBadge?: boolean;
   couponCode?: string;
   discountPercentage?: number;
   couponsLeft?: number;
+  totalCouponsIssued?: number;
+  couponsRedeemed?: number;
+  password?: string;
 }
 
 export interface ForumReply {

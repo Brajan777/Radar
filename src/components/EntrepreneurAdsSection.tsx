@@ -24,7 +24,8 @@ import {
   Ticket,
   X,
   Copy,
-  Database
+  Database,
+  Lock
 } from 'lucide-react';
 import { EntrepreneurAd, EntrepreneurCategory, AdSpaceType, VillaNuevaZona, MunicipioSur, EventItem } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
@@ -35,6 +36,7 @@ interface EntrepreneurAdsSectionProps {
   events: EventItem[];
   onSubmitAd: (newAd: EntrepreneurAd) => void;
   onSelectEvent?: (event: EventItem) => void;
+  onOpenBusinessPortal?: () => void;
 }
 
 const CATEGORIES: { label: string; value: EntrepreneurCategory | 'all' }[] = [
@@ -86,6 +88,7 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
   ads,
   events,
   onSubmitAd,
+  onOpenBusinessPortal,
 }) => {
   const [selectedMunicipio, setSelectedMunicipio] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<EntrepreneurCategory | 'all'>('all');
@@ -103,6 +106,9 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
   const [category, setCategory] = useState<EntrepreneurCategory>('Gastronomía & Food Trucks');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [couponsStock, setCouponsStock] = useState<number>(20);
+  const [discountPercent, setDiscountPercent] = useState<number>(15);
   const [zona, setZona] = useState<VillaNuevaZona>('Zona 1 - Centro Histórico');
   const [spaceType, setSpaceType] = useState<AdSpaceType>('Stand Comercial en Feria / Bazar');
   const [targetEventId, setTargetEventId] = useState<string>('todos');
@@ -159,6 +165,7 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
       municipio: formMunicipio,
       phone: phone.trim(),
       email: email.trim() || 'contacto@emprendimiento.gt',
+      password: password.trim() || 'radar123',
       instagramUrl: instagramUrl.trim() || undefined,
       spaceType,
       targetEventId: targetEventId !== 'todos' ? targetEventId : undefined,
@@ -166,10 +173,12 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
       zona,
       productDescription: productDescription.trim(),
       imageUrl: finalImage,
-      specialOffer: specialOffer.trim() || '15% de descuento presentando cupón de Radar Sur',
+      specialOffer: specialOffer.trim() || `${discountPercent}% de descuento presentando cupón de Radar Sur`,
       couponCode: generatedCode,
-      discountPercentage: 15,
-      couponsLeft: 15,
+      discountPercentage: discountPercent || 15,
+      couponsLeft: couponsStock || 20,
+      totalCouponsIssued: couponsStock || 20,
+      couponsRedeemed: 0,
       status: 'en_revision',
       createdAt: new Date().toISOString().split('T')[0],
       budget: budget.trim() || undefined,
@@ -185,6 +194,7 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
     setOwnerName('');
     setPhone('');
     setEmail('');
+    setPassword('');
     setProductDescription('');
     setSpecialOffer('');
     setCouponCode('');
@@ -245,6 +255,21 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
 
             <div className="flex items-center gap-3 shrink-0 flex-wrap">
               <button
+                onClick={() => {
+                  if (onOpenBusinessPortal) {
+                    onOpenBusinessPortal();
+                  } else {
+                    window.location.hash = '#negocio';
+                  }
+                }}
+                className="px-4 py-3 text-xs sm:text-sm font-90s text-black bg-[#CCFF00] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
+                title="Acceso para dueños de negocios para ver y canjear cupones"
+              >
+                <Store className="w-4 h-4 text-[#FF007F]" />
+                <span>SOY NEGOCIO / MI PORTAL ★</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab('form')}
                 className="px-5 py-3 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-black border-3 border-black shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
               >
@@ -302,6 +327,20 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => {
+                  if (onOpenBusinessPortal) {
+                    onOpenBusinessPortal();
+                  } else {
+                    window.location.hash = '#negocio';
+                  }
+                }}
+                className="px-5 py-2.5 text-xs font-90s text-black bg-[#FFE600] hover:bg-[#00F0FF] border-2 border-black shadow-[3px_3px_0_#000] flex items-center gap-2 cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+              >
+                <Store className="w-4 h-4 text-[#FF007F]" />
+                <span>ENTRAR A MI PORTAL DE NEGOCIO Y VER MIS CUPONES →</span>
+              </button>
+
               <button
                 onClick={() => setLastSubmittedAd(null)}
                 className="px-4 py-2.5 text-xs font-90s text-black bg-white hover:bg-slate-200 border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
@@ -686,6 +725,78 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                     placeholder="Ej. 15% de descuento al mostrar código Radar Sur"
                     className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
                   />
+                </div>
+
+                {/* Email for login */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-90s text-black uppercase">
+                    Correo Electrónico (para login de tu negocio) *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tucorreo@negocio.gt"
+                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-[#FFFDF0]"
+                  />
+                </div>
+
+                {/* User Password / PIN */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-90s text-black uppercase flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-[#FF007F]" />
+                    <span>Contraseña / PIN de tu Portal *</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Crea un PIN o clave secreta (ej. 2026negocio)"
+                    className="w-full px-4 py-3 text-sm bg-[#FFE600]/30 border-3 border-black font-bold text-black shadow-[3px_3px_0_#000] focus:outline-none focus:bg-white"
+                  />
+                  <span className="text-[10px] text-slate-500 font-bold block">
+                    Con este PIN y tu correo/teléfono podrás ingresar a tu panel y canjear cupones de clientes.
+                  </span>
+                </div>
+
+                {/* Limited Coupons Stock Selector */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-90s text-black uppercase flex items-center gap-1.5">
+                    <Ticket className="w-3.5 h-3.5 text-[#FF007F]" />
+                    <span>Límite de Cupones Iniciales a Otorgar *</span>
+                  </label>
+                  <select
+                    value={couponsStock}
+                    onChange={(e) => setCouponsStock(Number(e.target.value))}
+                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-black text-black shadow-[3px_3px_0_#000] focus:outline-none"
+                  >
+                    <option value={10}>10 Cupones Limitados (Prueba Piloto)</option>
+                    <option value={20}>20 Cupones Limitados (Recomendado)</option>
+                    <option value={30}>30 Cupones Limitados (Campaña Activa)</option>
+                    <option value={50}>50 Cupones Limitados (Gran Promoción)</option>
+                    <option value={100}>100 Cupones Limitados (Apertura / Stand)</option>
+                  </select>
+                </div>
+
+                {/* Discount Percentage */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-90s text-black uppercase">
+                    Porcentaje de Descuento (% OFF) *
+                  </label>
+                  <select
+                    value={discountPercent}
+                    onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                    className="w-full px-4 py-3 text-sm bg-white border-3 border-black font-black text-black shadow-[3px_3px_0_#000] focus:outline-none"
+                  >
+                    <option value={10}>10% de Descuento</option>
+                    <option value={15}>15% de Descuento (Estándar Radar)</option>
+                    <option value={20}>20% de Descuento</option>
+                    <option value={25}>25% de Descuento</option>
+                    <option value={30}>30% de Descuento</option>
+                    <option value={50}>50% de Descuento (Super Promo)</option>
+                  </select>
                 </div>
 
               </div>

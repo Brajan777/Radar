@@ -216,6 +216,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <div className="flex flex-col gap-2 pt-2 border-t-2 border-black">
+              <a
+                href="#negocio"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  window.location.hash = '#negocio';
+                }}
+                className="w-full py-2.5 text-xs font-90s bg-[#FFE600] text-black border-2 border-black shadow-[3px_3px_0_#000] flex items-center justify-center gap-2"
+              >
+                <Store className="w-4 h-4 text-[#FF007F]" />
+                <span>Portal de Negocios & Cupones</span>
+              </a>
+
               <button
                 onClick={() => {
                   onOpenSocialModal();

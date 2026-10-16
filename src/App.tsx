@@ -18,6 +18,7 @@ import { EventCard } from './components/EventCard';
 import { InteractiveCalendar } from './components/InteractiveCalendar';
 import { SubagentsHub } from './components/SubagentsHub';
 import { AdminPanel } from './components/AdminPanel';
+import { BusinessPortal } from './components/BusinessPortal';
 import { PlatformStats } from './components/PlatformStats';
 import { EventModal } from './components/EventModal';
 import { ProposeEventModal } from './components/ProposeEventModal';
@@ -54,7 +55,8 @@ import {
   Navigation,
   Store,
   Lock,
-  LogOut
+  LogOut,
+  Ticket
 } from 'lucide-react';
 
 export default function App() {
@@ -70,8 +72,9 @@ export default function App() {
   const [userCoords, setUserCoords] = useState<LatLng>(RADAR_SUR_CENTER);
   const [isGeoActive, setIsGeoActive] = useState(false);
 
-  // Navigation state: website mode vs admin dedicated view
-  const [currentView, setCurrentView] = useState<'website' | 'admin' | 'subagents'>('website');
+  // Navigation state: website mode vs admin dedicated view vs business portal
+  const [currentView, setCurrentView] = useState<'website' | 'admin' | 'subagents' | 'business-portal'>('website');
+  const [activeBusinessId, setActiveBusinessId] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState<string>('inicio');
 
   // Search & Filter state
@@ -119,19 +122,28 @@ export default function App() {
     showToast('Sesión de administrador cerrada con éxito.');
   };
 
-  // Detección de ruta secreta (#admin, /admin, ?admin) y atajo de teclado Ctrl+Shift+A
+  // Detección de rutas (#admin, #negocio, #portal) y atajo de teclado Ctrl+Shift+A
   useEffect(() => {
-    const evaluateAdminRoute = () => {
+    const evaluateRoute = () => {
       const hash = window.location.hash.toLowerCase();
       const path = window.location.pathname.toLowerCase();
       const search = window.location.search.toLowerCase();
       if (hash === '#admin' || path === '/admin' || search.includes('admin=true')) {
         requestAdminAccess();
+      } else if (
+        hash === '#negocio' || 
+        hash === '#portal' || 
+        hash === '#negocios' || 
+        hash === '#business' || 
+        path === '/portal' || 
+        path === '/negocio'
+      ) {
+        setCurrentView('business-portal');
       }
     };
 
-    evaluateAdminRoute();
-    window.addEventListener('hashchange', evaluateAdminRoute);
+    evaluateRoute();
+    window.addEventListener('hashchange', evaluateRoute);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Atajo secreto: Ctrl + Shift + A
@@ -449,11 +461,36 @@ export default function App() {
             onUpdateAd={handleUpdateEntrepreneurAd}
             onDeleteAd={handleDeleteEntrepreneurAd}
             onSyncSupabase={handleSyncSupabase}
+            onOpenBusinessPortal={(bId) => {
+              setActiveBusinessId(bId);
+              setCurrentView('business-portal');
+              window.location.hash = '#negocio';
+            }}
           />
         </div>
       )}
 
-      {/* VIEW 2: The Complete Living Website Landing & Exploration Experience */}
+      {/* VIEW 2: Dedicated Business Portal Workspace for Entrepreneurs & Coupons */}
+      {currentView === 'business-portal' && (
+        <BusinessPortal
+          businessAds={entrepreneurAds}
+          activeBusinessId={activeBusinessId}
+          events={events}
+          onSelectBusiness={(id) => setActiveBusinessId(id)}
+          onUpdateBusiness={handleUpdateEntrepreneurAd}
+          onExitPortal={() => {
+            setCurrentView('website');
+            window.location.hash = '';
+          }}
+          onGoToRegister={() => {
+            setCurrentView('website');
+            window.location.hash = '#emprendedores';
+            scrollToSection('emprendedores');
+          }}
+        />
+      )}
+
+      {/* VIEW 3: The Complete Living Website Landing & Exploration Experience */}
       {currentView === 'website' && (
         <main className="flex-1">
           {/* Section 1: Hero Section */}
@@ -678,6 +715,10 @@ export default function App() {
             events={events}
             onSubmitAd={handleAddEntrepreneurAd}
             onSelectEvent={(ev) => setSelectedEventModal(ev)}
+            onOpenBusinessPortal={() => {
+              setCurrentView('business-portal');
+              window.location.hash = '#negocio';
+            }}
           />
 
           {/* Section 5: Social Promotion Studio */}
@@ -848,7 +889,19 @@ export default function App() {
               <DragonRadarLogo size="sm" />
               <span>© 2026 RADAR SUR · Villa Nueva · San Miguel Petapa · Villa Canales, Guatemala.</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+              <button 
+                onClick={() => {
+                  setCurrentView('business-portal');
+                  window.location.hash = '#negocio';
+                }}
+                className="hover:text-[#CCFF00] text-[#00F0FF] font-90s flex items-center gap-1.5 cursor-pointer transition-colors"
+                title="Acceso exclusivo para dueños de negocios para canjear cupones"
+              >
+                <Store className="w-3.5 h-3.5 text-[#FFE600]" />
+                <span>Portal de Negocios & Cupones</span>
+              </button>
+              <span>·</span>
               <button 
                 onClick={() => setIsProposeModalOpen(true)}
                 className="hover:text-[#FFE600] transition-colors cursor-pointer"
