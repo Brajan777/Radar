@@ -35,6 +35,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   const occupancyPercent = Math.min(100, Math.round((event.rsvpCount / event.capacity) * 100));
 
   const googleMapsUrl = event.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${event.coordinates.lat},${event.coordinates.lng}`;
+  const isRadarEvent = event.sourceType === 'radar' || (event.organizer?.type ? event.organizer.type.includes('Radar') : false);
   const getMuniBadge = (muni: string) => {
     switch (muni) {
       case 'Villa Nueva':
@@ -92,7 +93,7 @@ export const EventCard: React.FC<EventCardProps> = ({
             </span>
           ) : (
             <span className="px-2 py-0.5 text-[10px] font-90s uppercase bg-white text-black border-2 border-black shadow-[2px_2px_0_#000] inline-block">
-              🏛️ {event.organizer.type}
+              🏛️ {event.organizer?.type || 'Municipal'}
             </span>
           )}
         </div>
