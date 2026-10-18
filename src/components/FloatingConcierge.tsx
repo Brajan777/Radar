@@ -30,10 +30,10 @@ export const FloatingConcierge: React.FC<FloatingConciergeProps> = ({ user }) =>
   ]);
 
   const quickPrompts = [
-    '¿Qué planes familiares hay este fin de semana?',
-    '¿Cómo llegar al Festival de la Piña en Villa Canales?',
-    '¿Dónde hay parqueo seguro para el Festival del Mango en Petapa?',
-    '¿Qué actividades deportivas o ciclovías son 100% gratis?'
+    '¿Qué planes familiares hay este fin de semana (23-25 Oct)?',
+    '¿Cómo llegar al Recorrido de Leyendas en Villa Nueva?',
+    '¿Dónde hay parqueo para el Bazar en San Miguel Petapa?',
+    '¿Qué actividades hay en Boca del Monte y Villa Canales?'
   ];
 
   const handleAsk = async (textToSend: string) => {
@@ -70,7 +70,7 @@ export const FloatingConcierge: React.FC<FloatingConciergeProps> = ({ user }) =>
         ...prev,
         {
           sender: 'agent',
-          text: `Te recomendamos el Festival del Chuchito en Villa Nueva, el Festival del Mango en San Miguel Petapa y la Gran Feria de la Piña en Villa Canales. Además, las 3 PMT mantienen operativos viales en Bulevar El Frutal, CA-9 y VAS para que llegues seguro.`,
+          text: `Este fin de semana (23 al 25 de octubre) tenemos el Recorrido Nocturno de Leyendas y la Feria Pre-Fieros en Villa Nueva, el Bazar de Dulces Típicos y Copa Fútbol 7 en San Miguel Petapa, y la Feria del Agricultor y Barriletes en Villa Canales. Las 3 PMT mantienen operativos viales en El Frutal, CA-9 y VAS.`,
           time: now
         }
       ]);
@@ -83,68 +83,20 @@ export const FloatingConcierge: React.FC<FloatingConciergeProps> = ({ user }) =>
 
   return (
     <>
-      {/* Floating Radar & Incoming Agent Notification Bubble */}
+      {/* Floating Round Dragon Radar with Notification Badge Only */}
       {!isOpen && (
-        <div className="fixed bottom-6 left-5 z-40 flex flex-col items-start gap-2.5 max-w-[290px] sm:max-w-xs select-none">
-          
-          {/* Speech Bubble / Notification from the Agent */}
-          {showNotification && (
-            <div className="relative bg-[#FFFDF0] border-3 border-black p-3.5 shadow-[5px_5px_0_#000] animate-in fade-in slide-in-from-bottom-3 duration-300 space-y-2">
-              {/* Bubble pointer triangle pointing down towards the radar */}
-              <div className="absolute -bottom-2.5 left-6 w-4 h-4 bg-[#FFFDF0] border-r-3 border-b-3 border-black rotate-45" />
-
-              <div className="flex items-center justify-between gap-2 border-b-2 border-black pb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF66] opacity-80" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00FF66] border border-black" />
-                  </span>
-                  <span className="text-[10px] font-90s uppercase text-black tracking-wider">
-                    ★ AGENTE RADAR SUR EN VIVO
-                  </span>
-                </div>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowNotification(false);
-                  }}
-                  className="text-slate-400 hover:text-black p-0.5"
-                  title="Cerrar notificación"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <p className="text-xs font-bold text-black leading-snug">
-                ¡Hola vecino! 🎯 Te invito al <strong>Festival del Chuchito</strong> y actividades familiares este fin de semana en el Sur. ¿Quieres que te pase rutas y parqueos PMT?
-              </p>
-
-              <button
-                onClick={() => {
-                  setIsOpen(true);
-                  setShowNotification(false);
-                }}
-                className="w-full py-1.5 px-3 bg-[#FFE600] hover:bg-[#FF007F] hover:text-white text-black font-90s text-[11px] uppercase border-2 border-black shadow-[2px_2px_0_#000] transition-all flex items-center justify-center gap-1.5 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>¡VER INVITACIÓN!</span>
-              </button>
-            </div>
-          )}
-
-          {/* Floating Round Dragon Radar ONLY */}
+        <div className="fixed bottom-6 left-5 z-40 flex items-center select-none">
           <button
             onClick={() => {
               setIsOpen(true);
               setShowNotification(false);
             }}
             className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#FFE600] hover:bg-[#00F0FF] border-3 sm:border-4 border-black shadow-[5px_5px_0_#000] flex items-center justify-center cursor-pointer transition-all hover:scale-110 active:scale-95 animate-float-slow group"
-            title="Toca el Radar para hablar con el Agente de Radar Sur"
+            title="Tienes 1 mensaje en el Radar Chat"
           >
             <DragonRadarLogo size="md" />
 
-            {/* Notification Badge */}
+            {/* Notification Badge showing 1 unread message */}
             {showNotification && (
               <span className="absolute -top-1 -right-1 flex h-5 w-5 sm:h-6 sm:w-6">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF007F] opacity-75" />

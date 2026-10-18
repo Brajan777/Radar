@@ -172,7 +172,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </p>
             </div>
 
-            {/* Action Buttons: 90s Neo-Brutalist Buttons with Bouncy Transitions */}
+            {/* Action Buttons: Only 2 Primary Buttons */}
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={onScrollToEvents}
@@ -184,28 +184,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </button>
 
               <button
-                onClick={onOpenPropose}
-                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#00F0FF] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-black" />
-                <span>PROPONER ACTIVIDAD</span>
-              </button>
-
-              <button
                 onClick={onOpenCalendar}
                 className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-black bg-[#CCFF00] hover:bg-[#FFE600] border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Calendar className="w-4 h-4" />
                 <span>CALENDARIO</span>
               </button>
-
-              <a
-                href="#emprendedores"
-                className="w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-90s text-white bg-[#FF007F] hover:bg-[#FFE600] hover:text-black border-3 border-black shadow-[4px_4px_0_#000] sm:shadow-[5px_5px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Store className="w-4 h-4 animate-bounce" />
-                <span>CUPONES & ADS</span>
-              </a>
             </div>
 
             {/* Trust Badges Bar */}

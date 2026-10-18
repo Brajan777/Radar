@@ -229,7 +229,7 @@ export default function App() {
     } else if (quickFilter === 'gastro') {
       matchesQuick = ev.category === 'Gastronómico' || ev.tags.some(t => t.toLowerCase().includes('gastronomía') || t.toLowerCase().includes('chuchito') || t.toLowerCase().includes('piña') || t.toLowerCase().includes('mango'));
     } else if (quickFilter === 'weekend') {
-      matchesQuick = ev.isFeatured || ev.capacity > 1000;
+      matchesQuick = ['2026-10-23', '2026-10-24', '2026-10-25'].includes(ev.date);
     }
 
     return matchesSearch && matchesMunicipio && matchesZona && matchesCategory && matchesSource && matchesQuick;

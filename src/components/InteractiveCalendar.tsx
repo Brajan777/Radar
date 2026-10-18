@@ -28,8 +28,8 @@ export const InteractiveCalendar: React.FC<InteractiveCalendarProps> = ({
   onQuickRsvp,
   onOpenShareModal,
 }) => {
-  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 9, 14)); // October 2026
-  const [selectedDay, setSelectedDay] = useState<number>(18);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 9, 24)); // October 2026
+  const [selectedDay, setSelectedDay] = useState<number>(24);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'agenda'>('grid');
 
