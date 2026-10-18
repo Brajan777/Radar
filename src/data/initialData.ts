@@ -829,7 +829,7 @@ export const INITIAL_ADS: EntrepreneurAd[] = [
     id: 'ad-vc-01',
     businessName: 'Dulces & Conservas de Piña Canaleña',
     ownerName: 'Familia Morales Canales',
-    category: 'Gastronómico',
+    category: 'Gastronomía & Food Trucks',
     municipio: 'Villa Canales',
     phone: '+502 5304-9911',
     email: 'pinascanaleñas@gmail.com',

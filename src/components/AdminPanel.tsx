@@ -1289,9 +1289,9 @@ CREATE POLICY "Permitir eliminacion" ON public.entrepreneurs FOR DELETE TO anon,
                     onChange={(e) => {
                       const newMuni = e.target.value as MunicipioSur;
                       const defaultZona = ZONAS_BY_MUNICIPIO[newMuni]?.[0] || editingEvent.zona;
-                      const updatedType = editingEvent.sourceType === 'municipal' 
+                      const updatedType = (editingEvent.sourceType === 'municipal' 
                         ? `Alcaldía ${newMuni}` 
-                        : editingEvent.organizer.type;
+                        : editingEvent.organizer.type) as any;
                       setEditingEvent({
                         ...editingEvent,
                         municipio: newMuni,

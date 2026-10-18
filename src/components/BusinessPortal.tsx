@@ -22,14 +22,17 @@ import {
   Eye,
   Plus,
   Minus,
-  Check,
-  ChevronRight,
-  ExternalLink,
   Layers,
-  Lock
+  Lock,
+  ShieldAlert,
+  RefreshCw,
+  Hash,
+  Check,
+  ChevronRight
 } from 'lucide-react';
-import { EntrepreneurAd, EventItem, MunicipioSur } from '../types';
+import { EntrepreneurAd, EventItem, MunicipioSur, UniqueCouponVoucher } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
+import { getVouchersForBusiness, redeemVoucher, loadVouchersVault } from '../utils/coupons';
 
 interface BusinessPortalProps {
   businessAds: EntrepreneurAd[];
@@ -58,9 +61,14 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
   // Tab inside active business dashboard
   const [portalTab, setPortalTab] = useState<'cupones' | 'perfil' | 'eventos'>('cupones');
 
-  // Customer redemption input
+  // Customer redemption input & feedback
   const [redeemCodeInput, setRedeemCodeInput] = useState('');
-  const [redeemSuccessMsg, setRedeemSuccessMsg] = useState<string | null>(null);
+  const [businessVouchers, setBusinessVouchers] = useState<UniqueCouponVoucher[]>([]);
+  const [redeemFeedback, setRedeemFeedback] = useState<{
+    type: 'idle' | 'success' | 'error';
+    message: string;
+    voucher?: UniqueCouponVoucher;
+  }>({ type: 'idle', message: '' });
 
   // Editing state for profile & coupons
   const activeBusiness = businessAds.find(b => b.id === activeBusinessId) || null;
@@ -76,7 +84,7 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
   const [editImageUrl, setEditImageUrl] = useState(activeBusiness?.imageUrl || '');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Update local edit form when active business changes
+  // Update local edit form and load vouchers when active business changes
   React.useEffect(() => {
     if (activeBusiness) {
       setEditName(activeBusiness.businessName);
@@ -88,7 +96,17 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
       setEditCouponCode(activeBusiness.couponCode || `RADAR-${activeBusiness.businessName.substring(0, 4).toUpperCase()}15`);
       setEditCouponsLeft(activeBusiness.couponsLeft ?? 15);
       setEditImageUrl(activeBusiness.imageUrl);
+      setBusinessVouchers(getVouchersForBusiness(activeBusiness.id));
     }
+
+    const handleVaultSync = () => {
+      if (activeBusiness) {
+        setBusinessVouchers(getVouchersForBusiness(activeBusiness.id));
+      }
+    };
+
+    window.addEventListener('radar_vouchers_updated', handleVaultSync);
+    return () => window.removeEventListener('radar_vouchers_updated', handleVaultSync);
   }, [activeBusinessId]);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -130,32 +148,58 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
     setLoginError(null);
   };
 
-  // Canjear 1 cupón de cliente
-  const handleRedeemCoupon = () => {
+  // Validar y Quemar 1 cupón único de cliente (Anti-Reutilización)
+  const handleValidateAndRedeem = (codeToRedeem?: string) => {
     if (!activeBusiness) return;
 
-    const currentLeft = activeBusiness.couponsLeft ?? 15;
-    if (currentLeft <= 0) {
-      alert('¡Ya no tienes cupones disponibles! Aumenta tu límite en la pestaña de Ajustes de Cupón.');
+    const code = (codeToRedeem || redeemCodeInput).trim().toUpperCase();
+    if (!code) {
+      setRedeemFeedback({
+        type: 'error',
+        message: 'Por favor ingresa o pega el código único del cliente para validar.'
+      });
       return;
     }
 
-    const currentRedeemed = activeBusiness.couponsRedeemed ?? 0;
-    const newLeft = currentLeft - 1;
-    const newRedeemed = currentRedeemed + 1;
+    const currentLeft = activeBusiness.couponsLeft ?? 15;
+    if (currentLeft <= 0) {
+      setRedeemFeedback({
+        type: 'error',
+        message: '¡Ya no tienes cupones disponibles en stock! Aumenta tu límite en la pestaña de Ajustes de Cupón.'
+      });
+      return;
+    }
 
-    const updated: EntrepreneurAd = {
-      ...activeBusiness,
-      couponsLeft: newLeft,
-      couponsRedeemed: newRedeemed,
-      totalCouponsIssued: activeBusiness.totalCouponsIssued || (newLeft + newRedeemed)
-    };
+    const res = redeemVoucher(code, activeBusiness.id);
 
-    onUpdateBusiness(updated);
-    setEditCouponsLeft(newLeft);
-    setRedeemSuccessMsg(`¡Cupón canjeado con éxito! Código ${activeBusiness.couponCode || 'RADAR'}. Te quedan ${newLeft} cupones.`);
-    setRedeemCodeInput('');
-    setTimeout(() => setRedeemSuccessMsg(null), 4000);
+    if (res.success && res.voucher) {
+      const newLeft = Math.max(0, currentLeft - 1);
+      const currentRedeemed = activeBusiness.couponsRedeemed ?? 0;
+      const newRedeemed = currentRedeemed + 1;
+
+      const updated: EntrepreneurAd = {
+        ...activeBusiness,
+        couponsLeft: newLeft,
+        couponsRedeemed: newRedeemed,
+        totalCouponsIssued: activeBusiness.totalCouponsIssued || (newLeft + newRedeemed)
+      };
+
+      onUpdateBusiness(updated);
+      setEditCouponsLeft(newLeft);
+      setRedeemFeedback({
+        type: 'success',
+        message: res.message,
+        voucher: res.voucher
+      });
+      setRedeemCodeInput('');
+      setBusinessVouchers(getVouchersForBusiness(activeBusiness.id));
+    } else {
+      setRedeemFeedback({
+        type: 'error',
+        message: res.message,
+        voucher: res.voucher
+      });
+    }
   };
 
   // Guardar cambios del perfil o cupón
@@ -473,88 +517,123 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
 
         {/* TAB 1: GESTIÓN DE CUPONES & CANJE DIRECTO DE CLIENTES */}
         {portalTab === 'cupones' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* Left Col: Módulo de Canje Rápido ("Validar Cupón de Cliente") */}
-            <div className="lg:col-span-5 bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-6">
-              <div className="border-b-2 border-black pb-3 space-y-1">
-                <span className="px-2 py-0.5 bg-[#FF007F] text-white font-90s text-[10px] uppercase border border-black">
-                  ★ CAJA & CANJE EN VIVO
-                </span>
-                <h3 className="text-lg font-90s text-black uppercase">
-                  Canjear Cupón de Cliente
-                </h3>
-                <p className="text-xs text-black/80 font-medium">
-                  Cuando un vecino te visite o te escriba mostrando su código QR de Radar Sur, canjéalo aquí para descontar del stock.
-                </p>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              {/* Left Col: Módulo de Canje Rápido ("Validar Cupón Único") */}
+              <div className="lg:col-span-5 bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-6">
+                <div className="border-b-2 border-black pb-3 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-0.5 bg-[#FF007F] text-white font-90s text-[10px] uppercase border border-black">
+                      ★ SISTEMA ANTI-REUTILIZACIÓN
+                    </span>
+                    <span className="px-2 py-0.5 bg-[#FFE600] text-black font-90s text-[10px] uppercase border border-black">
+                      CÓDIGOS DE 1 SOLO USO
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-90s text-black uppercase mt-1">
+                    Validar & Quemar Cupón
+                  </h3>
+                  <p className="text-xs text-black/80 font-medium leading-relaxed">
+                    Cada vecino recibe un código aleatorio único. Ingrésalo aquí para verificar su validez y <strong>quemarlo</strong> en tiempo real, bloqueando cualquier reutilización.
+                  </p>
+                </div>
+
+                {/* Feedback Banner (Success or Error / Reutilización) */}
+                {redeemFeedback.type === 'success' && (
+                  <div className="p-3.5 bg-emerald-500 text-white border-3 border-black font-bold text-xs shadow-[3px_3px_0_#000] space-y-1.5 animate-in fade-in">
+                    <div className="flex items-center gap-2 font-90s text-sm">
+                      <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
+                      <span>¡CANJE EXITOSO!</span>
+                    </div>
+                    <p className="text-white/95 text-[11px] font-semibold leading-snug">
+                      {redeemFeedback.message}
+                    </p>
+                    <div className="text-[10px] bg-black/40 px-2 py-1 font-mono uppercase text-[#CCFF00]">
+                      Estado: Código QUEMADO en sistema (inutilizable)
+                    </div>
+                  </div>
+                )}
+
+                {redeemFeedback.type === 'error' && (
+                  <div className="p-3.5 bg-[#FF007F] text-white border-3 border-black font-bold text-xs shadow-[3px_3px_0_#000] space-y-1.5 animate-in fade-in">
+                    <div className="flex items-center gap-2 font-90s text-sm text-[#FFE600]">
+                      <ShieldAlert className="w-5 h-5 shrink-0" />
+                      <span>ALERTA DE CANJE</span>
+                    </div>
+                    <p className="text-white text-[11px] font-bold leading-snug">
+                      {redeemFeedback.message}
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div className="p-4 bg-[#FFFDF0] border-2 border-black space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-black">
+                      <span>Prefijo Oficial de tu Negocio:</span>
+                      <strong className="bg-[#FFE600] px-2 py-0.5 border border-black font-mono">
+                        {activeBusiness.couponCode || 'RADAR-SUR'}
+                      </strong>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-bold text-black">
+                      <span>Descuento a Aplicar:</span>
+                      <strong className="text-[#FF007F] font-black">{activeBusiness.discountPercentage || 15}% OFF</strong>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-bold text-black">
+                      <span>Stock Restante:</span>
+                      <strong className="bg-black text-[#CCFF00] px-2 py-0.5 font-mono">{leftCount} cupones</strong>
+                    </div>
+                  </div>
+
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleValidateAndRedeem();
+                    }}
+                    className="space-y-2"
+                  >
+                    <label className="block text-xs font-90s text-black uppercase flex items-center justify-between">
+                      <span>Código Único del Cliente:</span>
+                      <span className="text-[#FF007F] text-[10px]">Requerido</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={redeemCodeInput}
+                      onChange={(e) => setRedeemCodeInput(e.target.value.toUpperCase())}
+                      placeholder="ej: VN-CHUC-7K2M"
+                      className="w-full px-3.5 py-3 bg-white border-3 border-black font-mono font-black text-sm text-black shadow-[3px_3px_0_#000] uppercase placeholder:text-slate-400 placeholder:font-normal focus:bg-[#FFFDF0] focus:outline-none"
+                    />
+
+                    <button
+                      type="submit"
+                      disabled={leftCount <= 0}
+                      className={`w-full py-3.5 font-90s text-xs sm:text-sm border-3 border-black shadow-[4px_4px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer ${
+                        leftCount > 0 
+                          ? 'bg-[#CCFF00] hover:bg-[#FFE600] text-black' 
+                          : 'bg-slate-300 text-slate-600 cursor-not-allowed'
+                      }`}
+                    >
+                      <Ticket className="w-4 h-4" />
+                      <span>VALIDAR Y QUEMAR CÓDIGO (1 SOLO USO) ★</span>
+                    </button>
+                  </form>
+                </div>
+
+                {/* Progress and Urgency Explanation */}
+                <div className="p-3 bg-blue-50 border-2 border-blue-300 text-xs text-blue-950 space-y-1 font-medium">
+                  <div className="font-bold flex items-center gap-1.5 text-blue-900">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Control Total Anti-Fraude:</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Si un cliente intenta presentar una captura de pantalla compartida por otra persona que ya usó el código, el sistema lo rechazará de inmediato indicando la fecha y hora del canje original.
+                  </p>
+                </div>
               </div>
 
-              {redeemSuccessMsg && (
-                <div className="p-3 bg-emerald-500 text-white border-2 border-black font-bold text-xs shadow-[3px_3px_0_#000] flex items-center gap-2 animate-in fade-in">
-                  <Check className="w-4 h-4 shrink-0" />
-                  <span>{redeemSuccessMsg}</span>
-                </div>
-              )}
-
-              <div className="space-y-3">
-                <div className="p-4 bg-[#FFFDF0] border-2 border-black space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-black">
-                    <span>Código de tu Negocio:</span>
-                    <strong className="bg-[#FFE600] px-2 py-0.5 border border-black font-mono">
-                      {activeBusiness.couponCode || 'RADAR-SUR'}
-                    </strong>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-bold text-black">
-                    <span>Descuento Aplicado:</span>
-                    <strong className="text-[#FF007F] font-black">{activeBusiness.discountPercentage || 15}% OFF</strong>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-bold text-black">
-                    <span>Cupones Restantes:</span>
-                    <strong className="bg-black text-[#CCFF00] px-2 py-0.5 font-mono">{leftCount}</strong>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-90s text-black uppercase">
-                    Código de cliente (Opcional):
-                  </label>
-                  <input
-                    type="text"
-                    value={redeemCodeInput}
-                    onChange={(e) => setRedeemCodeInput(e.target.value)}
-                    placeholder={activeBusiness.couponCode || "ej: RADAR-CHUCHITO15"}
-                    className="w-full px-3.5 py-2.5 bg-white border-2 border-black font-mono font-bold text-xs shadow-[2px_2px_0_#000]"
-                  />
-                </div>
-
-                <button
-                  onClick={handleRedeemCoupon}
-                  disabled={leftCount <= 0}
-                  className={`w-full py-3.5 font-90s text-sm border-3 border-black shadow-[4px_4px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer ${
-                    leftCount > 0 
-                      ? 'bg-[#CCFF00] hover:bg-[#FFE600] text-black' 
-                      : 'bg-slate-300 text-slate-600 cursor-not-allowed'
-                  }`}
-                >
-                  <Ticket className="w-4 h-4" />
-                  <span>{leftCount > 0 ? 'VALIDAR Y CANJEAR 1 CUPÓN (-1)' : 'SIN CUPONES DISPONIBLES'}</span>
-                </button>
-              </div>
-
-              {/* Progress and Urgency Explanation */}
-              <div className="p-3 bg-blue-50 border-2 border-blue-300 rounded-none text-xs text-blue-950 space-y-1 font-medium">
-                <div className="font-bold flex items-center gap-1.5 text-blue-900">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Estrategia de Ventas:</span>
-                </div>
-                <p>
-                  Tener un número limitado de cupones (ej. 20-25) genera <strong>urgencia real</strong> en los vecinos para visitarte antes de que se agoten.
-                </p>
-              </div>
-            </div>
-
-            {/* Right Col: Configuración de la Promoción */}
-            <div className="lg:col-span-7 bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-6">
+              {/* Right Col: Configuración de la Promoción */}
+              <div className="lg:col-span-7 bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-6">
               <div className="border-b-2 border-black pb-3 space-y-1">
                 <span className="px-2 py-0.5 bg-[#00F0FF] text-black font-90s text-[10px] uppercase border border-black">
                   ★ AJUSTES DE PROMOCIÓN
@@ -664,7 +743,114 @@ export const BusinessPortal: React.FC<BusinessPortalProps> = ({
               </form>
             </div>
           </div>
-        )}
+
+          {/* AUDITORÍA Y REGISTRO EN VIVO DE CÓDIGOS EMITIDOS */}
+          <div className="bg-white border-4 border-black p-6 shadow-[6px_6px_0_#000] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-3 border-black pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 bg-[#CCFF00] text-black font-90s text-[10px] uppercase border border-black">
+                    AUDITORÍA EN VIVO
+                  </span>
+                  <span className="text-[10px] font-bold text-black/70">
+                    Garantía de códigos únicos e irrepetibles
+                  </span>
+                </div>
+                <h3 className="text-lg font-90s text-black uppercase mt-1">
+                  Historial de Códigos Generados para tu Negocio
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-3 py-1 bg-[#FFE600] text-black font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000]">
+                  Total en Sistema: {businessVouchers.length}
+                </span>
+                <span className="px-3 py-1 bg-emerald-400 text-black font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000]">
+                  Quemados: {businessVouchers.filter(v => v.status === 'canjeado').length}
+                </span>
+                <span className="px-3 py-1 bg-[#00F0FF] text-black font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000]">
+                  Activos: {businessVouchers.filter(v => v.status === 'activo').length}
+                </span>
+              </div>
+            </div>
+
+            {businessVouchers.length === 0 ? (
+              <div className="p-8 text-center bg-[#FFFDF0] border-2 border-dashed border-black space-y-2">
+                <div className="w-12 h-12 bg-[#FFE600] border-2 border-black mx-auto flex items-center justify-center font-90s text-lg shadow-[2px_2px_0_#000]">
+                  🎟️
+                </div>
+                <h4 className="font-90s text-sm text-black uppercase">
+                  Aún no se han emitido códigos para tu negocio
+                </h4>
+                <p className="text-xs text-black/70 max-w-md mx-auto font-medium">
+                  En cuanto los vecinos abran tu cupón desde la vitrina de Radar Sur o soliciten el descuento, sus códigos aleatorios únicos e irrepetibles aparecerán registrados aquí de inmediato.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto border-2 border-black">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-black text-white font-90s uppercase text-[11px] tracking-wider">
+                      <th className="p-3 border-r border-white/20">Código Único</th>
+                      <th className="p-3 border-r border-white/20">Descuento</th>
+                      <th className="p-3 border-r border-white/20">Emitido</th>
+                      <th className="p-3 border-r border-white/20">Estado Anti-Reutilización</th>
+                      <th className="p-3 text-right">Acción de Caja</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y-2 divide-black font-bold">
+                    {businessVouchers.map((v) => {
+                      const isRedeemed = v.status === 'canjeado';
+                      return (
+                        <tr key={v.id} className={`transition-colors ${isRedeemed ? 'bg-slate-100/80 text-black/60' : 'bg-white hover:bg-[#FFE600]/20 text-black'}`}>
+                          <td className="p-3 font-mono font-black border-r-2 border-black">
+                            <span className={`px-2 py-1 border border-black inline-block ${isRedeemed ? 'bg-slate-200 line-through text-slate-500' : 'bg-[#FFE600] text-black shadow-[1.5px_1.5px_0_#000]'}`}>
+                              {v.code}
+                            </span>
+                          </td>
+                          <td className="p-3 border-r-2 border-black font-black text-black">
+                            {v.discountPercentage}% OFF
+                          </td>
+                          <td className="p-3 border-r-2 border-black text-[11px] text-black/80 font-mono">
+                            {new Date(v.issuedAt).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td className="p-3 border-r-2 border-black">
+                            {isRedeemed ? (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500 text-white font-90s text-[10px] border border-black">
+                                <Check className="w-3 h-3" />
+                                <span>QUEMADO / CANJEADO ({v.redeemedAt})</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#FFE600] text-black font-90s text-[10px] border border-black animate-pulse">
+                                <span>● ACTIVO / PENDIENTE DE CLIENTE</span>
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-3 text-right">
+                            {isRedeemed ? (
+                              <span className="text-[10px] text-slate-500 font-bold uppercase">
+                                Inutilizable
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleValidateAndRedeem(v.code)}
+                                className="px-3 py-1 bg-[#CCFF00] hover:bg-black hover:text-[#CCFF00] text-black font-90s text-[11px] border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer transition-all"
+                              >
+                                Quemar Cupón
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
         {/* TAB 2: EDITAR PERFIL & FOTOS DEL NEGOCIO */}
         {portalTab === 'perfil' && (

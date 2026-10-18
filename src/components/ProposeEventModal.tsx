@@ -43,7 +43,7 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<EventCategory>('Familiar');
   const [municipio, setMunicipio] = useState<MunicipioSur>('Villa Nueva');
-  const [zona, setZona] = useState<SurZona>(ZONAS_BY_MUNICIPIO['Villa Nueva'][0]);
+  const [zona, setZona] = useState<SurZona>(ZONAS_BY_MUNICIPIO['Villa Nueva'][0] as SurZona);
   const [date, setDate] = useState('2026-11-05');
   const [time, setTime] = useState('09:00 AM - 02:00 PM');
   const [locationName, setLocationName] = useState('');
@@ -62,7 +62,7 @@ export const ProposeEventModal: React.FC<ProposeEventModalProps> = ({
     setMunicipio(newMuni);
     const availableZonas = ZONAS_BY_MUNICIPIO[newMuni];
     if (availableZonas && availableZonas.length > 0) {
-      setZona(availableZonas[0]);
+      setZona(availableZonas[0] as SurZona);
     }
   };
 

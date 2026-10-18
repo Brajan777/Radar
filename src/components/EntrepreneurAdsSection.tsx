@@ -25,11 +25,14 @@ import {
   X,
   Copy,
   Database,
-  Lock
+  Lock,
+  ShieldAlert,
+  ShieldCheck
 } from 'lucide-react';
-import { EntrepreneurAd, EntrepreneurCategory, AdSpaceType, VillaNuevaZona, MunicipioSur, EventItem } from '../types';
+import { EntrepreneurAd, EntrepreneurCategory, AdSpaceType, VillaNuevaZona, MunicipioSur, EventItem, UniqueCouponVoucher } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
 import { ZONAS_BY_MUNICIPIO } from './HeroSection';
+import { issueUniqueVoucher, loadVouchersVault } from '../utils/coupons';
 
 interface EntrepreneurAdsSectionProps {
   ads: EntrepreneurAd[];
@@ -96,7 +99,8 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
 
   // Interactive Coupon Modal State
   const [activeCouponAd, setActiveCouponAd] = useState<EntrepreneurAd | null>(null);
-  const [couponTimerSeconds, setCouponTimerSeconds] = useState<number>(1200); // 20 minutes countdown
+  const [activeVoucher, setActiveVoucher] = useState<UniqueCouponVoucher | null>(null);
+  const [couponTimerSeconds, setCouponTimerSeconds] = useState<number>(1200); // countdown
   const [copiedCoupon, setCopiedCoupon] = useState<boolean>(false);
 
   // Form State
@@ -123,15 +127,41 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
   // Submitted ticket
   const [lastSubmittedAd, setLastSubmittedAd] = useState<EntrepreneurAd | null>(null);
 
-  // Countdown timer for coupon urgency
+  // Abrir modal de cupón generando código único aleatorio
+  const handleOpenCouponModal = (ad: EntrepreneurAd) => {
+    const voucher = issueUniqueVoucher(ad);
+    setActiveVoucher(voucher);
+    setActiveCouponAd(ad);
+  };
+
+  // Countdown timer for coupon urgency & live sync
   useEffect(() => {
-    if (!activeCouponAd) return;
-    setCouponTimerSeconds(1200); // Reset to 20 minutes on open
-    const interval = setInterval(() => {
-      setCouponTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [activeCouponAd]);
+    if (!activeCouponAd || !activeVoucher) return;
+
+    const updateTimer = () => {
+      const remainingMs = new Date(activeVoucher.expiresAt).getTime() - Date.now();
+      const secs = Math.max(0, Math.floor(remainingMs / 1000));
+      setCouponTimerSeconds(secs);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+
+    const handleVaultSync = () => {
+      const currentVault = loadVouchersVault();
+      const updated = currentVault.find(v => v.id === activeVoucher.id);
+      if (updated) {
+        setActiveVoucher(updated);
+      }
+    };
+
+    window.addEventListener('radar_vouchers_updated', handleVaultSync);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('radar_vouchers_updated', handleVaultSync);
+    };
+  }, [activeCouponAd, activeVoucher?.id]);
 
   const formatTimer = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
@@ -208,11 +238,11 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
     return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`;
   };
 
-  const generateWhatsAppCouponRedeem = (ad: EntrepreneurAd) => {
+  const generateWhatsAppCouponRedeem = (ad: EntrepreneurAd, voucher?: UniqueCouponVoucher | null) => {
     const cleanPhone = ad.phone.replace(/[^0-9]/g, '');
     const phoneWithCountry = cleanPhone.startsWith('502') ? cleanPhone : `502${cleanPhone}`;
-    const code = ad.couponCode || 'RADAR-SUR15';
-    const text = `¡Hola ${ad.businessName}! Acabo de generar mi Cupón Oficial en Radar Sur (#${code}). Quiero aprovechar el descuento en mi pedido o visita a su stand.`;
+    const code = voucher?.code || ad.couponCode || 'RADAR-SUR15';
+    const text = `¡Hola ${ad.businessName}! Acabo de generar mi Cupón Único Oficial en Radar Sur (#${code}). Es un código personal de 1 solo uso con ${ad.discountPercentage || 15}% OFF. ¿Me confirman para aplicarlo a mi pedido?`;
     return `https://wa.me/${phoneWithCountry}?text=${encodeURIComponent(text)}`;
   };
 
@@ -586,7 +616,7 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                       <div className="pt-3 border-t-2 border-black space-y-2">
                         {/* Interactive Coupon Trigger Button */}
                         <button
-                          onClick={() => setActiveCouponAd(ad)}
+                          onClick={() => handleOpenCouponModal(ad)}
                           className="w-full py-2.5 px-3 bg-[#FF007F] hover:bg-[#FFE600] hover:text-black text-white text-xs font-90s border-2 border-black shadow-[3px_3px_0_#000] hover-lift transition-bounce flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <QrCode className="w-4 h-4 animate-pulse" />
@@ -925,8 +955,8 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
               <div className="flex items-center gap-2">
                 <DragonRadarLogo size="sm" />
                 <div>
-                  <span className="text-[10px] font-90s uppercase bg-[#FF007F] text-white px-2 py-0.5 border border-black block">
-                    CUPÓN EXCLUSIVO RADAR SUR
+                  <span className="text-[10px] font-90s uppercase bg-[#FF007F] text-white px-2 py-0.5 border border-black inline-block">
+                    ★ CÓDIGO ÚNICO PERSONAL · UN SOLO USO
                   </span>
                   <h3 className="text-lg font-90s text-black uppercase mt-0.5">
                     {activeCouponAd.businessName}
@@ -942,69 +972,107 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
               </button>
             </div>
 
-            {/* Urgency Countdown Bar */}
-            <div className="bg-black text-white p-3 border-2 border-black flex items-center justify-between text-xs font-90s shadow-[3px_3px_0_#000]">
-              <div className="flex items-center gap-2 text-[#FFE600]">
-                <Clock className="w-4 h-4 animate-spin text-[#FF007F]" />
-                <span>VALIDEZ TEMPORAL:</span>
+            {/* Urgency Countdown Bar or Redeemed Alert */}
+            {activeVoucher?.status === 'canjeado' ? (
+              <div className="bg-emerald-600 text-white p-3 border-3 border-black flex items-center justify-between text-xs font-90s shadow-[4px_4px_0_#000]">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#FFE600]" />
+                  <span>ESTADO DEL CUPÓN:</span>
+                </div>
+                <span className="bg-black text-[#CCFF00] px-2.5 py-0.5 border border-white text-xs font-mono">
+                  QUEMADO / CANJEADO ({activeVoucher.redeemedAt || 'Completado'})
+                </span>
               </div>
-              <span className="bg-[#FF007F] text-white px-2.5 py-0.5 border border-white text-sm font-mono tracking-wider">
-                {formatTimer(couponTimerSeconds)}
-              </span>
-            </div>
+            ) : (
+              <div className="bg-black text-white p-3 border-2 border-black flex items-center justify-between text-xs font-90s shadow-[3px_3px_0_#000]">
+                <div className="flex items-center gap-2 text-[#FFE600]">
+                  <Clock className="w-4 h-4 animate-spin text-[#FF007F]" />
+                  <span>VALIDEZ TEMPORAL:</span>
+                </div>
+                <span className="bg-[#FF007F] text-white px-2.5 py-0.5 border border-white text-sm font-mono tracking-wider">
+                  {couponTimerSeconds > 0 ? formatTimer(couponTimerSeconds) : 'EXPIRADO'}
+                </span>
+              </div>
+            )}
 
             {/* QR and Code Box */}
             <div className="bg-white border-3 border-black p-5 text-center space-y-3 shadow-[4px_4px_0_#000]">
-              <div className="w-40 h-40 bg-[#FFFDF0] border-2 border-black p-2 mx-auto shadow-[3px_3px_0_#000] flex items-center justify-center">
+              <div className="relative w-40 h-40 bg-[#FFFDF0] border-2 border-black p-2 mx-auto shadow-[3px_3px_0_#000] flex items-center justify-center">
                 <QrCode className="w-full h-full text-black" />
+                {activeVoucher?.status === 'canjeado' && (
+                  <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-2 text-white">
+                    <CheckCircle2 className="w-8 h-8 text-[#CCFF00] mb-1" />
+                    <span className="text-[11px] font-90s uppercase text-[#FFE600]">CANJEADO</span>
+                    <span className="text-[9px] font-bold text-center">Descuento aplicado en caja</span>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-1">
-                <div className="text-[11px] font-bold text-black/70 uppercase">
-                  CÓDIGO DE CANJE:
+              <div className="space-y-1.5">
+                <div className="text-[11px] font-bold text-black/70 uppercase flex items-center justify-center gap-1">
+                  <span>TU CÓDIGO ÚNICO DE CANJE:</span>
                 </div>
-                <div className="inline-flex items-center gap-2 bg-[#FFE600] px-3 py-1 border-2 border-black font-mono font-black text-sm text-black shadow-[2px_2px_0_#000]">
-                  <span>{activeCouponAd.couponCode || 'RADAR-SUR15'}</span>
+                <div className="inline-flex items-center gap-2 bg-[#FFE600] px-3.5 py-1.5 border-3 border-black font-mono font-black text-base text-black shadow-[3px_3px_0_#000]">
+                  <span className={activeVoucher?.status === 'canjeado' ? 'line-through text-black/60' : ''}>
+                    {activeVoucher ? activeVoucher.code : (activeCouponAd.couponCode || 'RADAR-SUR15')}
+                  </span>
                   <button
                     onClick={() => {
-                      navigator.clipboard?.writeText(activeCouponAd.couponCode || 'RADAR-SUR15');
+                      const codeToCopy = activeVoucher ? activeVoucher.code : (activeCouponAd.couponCode || 'RADAR-SUR15');
+                      navigator.clipboard?.writeText(codeToCopy);
                       setCopiedCoupon(true);
                       setTimeout(() => setCopiedCoupon(false), 2000);
                     }}
-                    className="p-0.5 hover:text-[#FF007F] cursor-pointer"
+                    className="p-1 bg-white hover:bg-[#FF007F] hover:text-white border border-black cursor-pointer"
                     title="Copiar código"
                   >
-                    {copiedCoupon ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedCoupon ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
 
               <p className="text-xs font-black text-black">
-                {activeCouponAd.specialOffer || '15% de descuento al mostrar este código'}
+                {activeVoucher?.specialOffer || activeCouponAd.specialOffer || '15% de descuento al mostrar este código'}
               </p>
               
+              <div className="p-2.5 bg-[#FFFDF0] border-2 border-dashed border-black text-[11px] font-bold text-black/80 space-y-1 text-left">
+                <div className="flex items-center gap-1.5 text-black font-90s text-[10px] uppercase">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#FF007F]" />
+                  <span>Seguridad Anti-Reutilización:</span>
+                </div>
+                <p className="leading-snug">
+                  Este código es <strong>aleatorio, personal e irrepetible</strong>. Cuando el negocio lo valide, quedará <strong>quemado</strong> en el sistema para que nadie más pueda reutilizarlo.
+                </p>
+              </div>
+
               <div className="text-[10px] font-bold text-black/60 pt-1 border-t border-black/10">
-                Ubicación: {activeCouponAd.municipio} ({activeCouponAd.zona}) · Cupón personal
+                Ubicación: {activeCouponAd.municipio} ({activeCouponAd.zona}) · Cupón personal intransferible
               </div>
             </div>
 
             {/* CTAs */}
             <div className="space-y-2">
-              <a
-                href={generateWhatsAppCouponRedeem(activeCouponAd)}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-4 bg-[#CCFF00] hover:bg-black hover:text-[#CCFF00] text-black font-90s text-xs border-3 border-black shadow-[4px_4px_0_#000] flex items-center justify-center gap-2 transition-all"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>CANJEAR POR WHATSAPP CON EL NEGOCIO</span>
-              </a>
+              {activeVoucher?.status === 'canjeado' ? (
+                <div className="w-full py-3 px-4 bg-slate-200 text-slate-700 font-90s text-xs border-2 border-black text-center">
+                  ✓ CUPÓN YA UTILIZADO Y REGISTRADO
+                </div>
+              ) : (
+                <a
+                  href={generateWhatsAppCouponRedeem(activeCouponAd, activeVoucher)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3.5 px-4 bg-[#CCFF00] hover:bg-black hover:text-[#CCFF00] text-black font-90s text-xs border-3 border-black shadow-[4px_4px_0_#000] flex items-center justify-center gap-2 transition-all"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>CANJEAR CÓDIGO ÚNICO POR WHATSAPP</span>
+                </a>
+              )}
 
               <button
                 onClick={() => setActiveCouponAd(null)}
                 className="w-full py-2.5 px-4 bg-white hover:bg-slate-200 text-black font-90s text-xs border-2 border-black shadow-[2px_2px_0_#000] cursor-pointer"
               >
-                GUARDAR Y CERRAR
+                CERRAR
               </button>
             </div>
 

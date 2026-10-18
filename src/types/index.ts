@@ -124,6 +124,22 @@ export interface EntrepreneurAd {
   totalCouponsIssued?: number;
   couponsRedeemed?: number;
   password?: string;
+  createdAt?: string;
+}
+
+export interface UniqueCouponVoucher {
+  id: string;
+  code: string; // Código único aleatorio ej: VN-CHUC-8K2P
+  businessId: string;
+  businessName: string;
+  municipio?: MunicipioSur;
+  discountPercentage: number;
+  specialOffer: string;
+  issuedAt: string;
+  expiresAt: string;
+  status: 'activo' | 'canjeado' | 'expirado';
+  redeemedAt?: string;
+  userIdentifier?: string;
 }
 
 export interface ForumReply {

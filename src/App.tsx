@@ -155,7 +155,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener('hashchange', evaluateAdminRoute);
+      window.removeEventListener('hashchange', evaluateRoute);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
