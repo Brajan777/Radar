@@ -233,6 +233,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <img 
                   src={heroPhotos[activePhotoIdx].image} 
                   alt={heroPhotos[activePhotoIdx].title}
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
                 />

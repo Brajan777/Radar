@@ -57,6 +57,8 @@ export const EventCard: React.FC<EventCardProps> = ({
           <img
             src={event.imageUrl}
             alt={event.title}
+            loading="lazy"
+            decoding="async"
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}
             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"

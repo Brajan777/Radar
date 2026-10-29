@@ -554,6 +554,8 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                       <img
                         src={ad.imageUrl}
                         alt={ad.businessName}
+                        loading="lazy"
+                        decoding="async"
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -565,11 +567,16 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                           {ad.municipio || 'Sur Metropolitano'}
                         </span>
 
-                        {ad.discountPercentage && (
-                          <span className="px-2 py-0.5 text-[11px] font-90s bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000] animate-pulse">
-                            ★ {ad.discountPercentage}% OFF
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-0.5 text-[10px] font-90s bg-[#00F0FF] text-black border-2 border-black shadow-[2px_2px_0_#000]">
+                            ⚡ ALTA DEMANDA
                           </span>
-                        )}
+                          {ad.discountPercentage && (
+                            <span className="px-2 py-0.5 text-[11px] font-90s bg-[#FF007F] text-white border-2 border-black shadow-[2px_2px_0_#000] animate-pulse">
+                              ★ {ad.discountPercentage}% OFF
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Business Name on Photo Overlay */}
@@ -591,6 +598,17 @@ export const EntrepreneurAdsSection: React.FC<EntrepreneurAdsSectionProps> = ({
                           <span className="flex items-center gap-1 bg-[#FFFDF0] px-1.5 py-0.5 border border-black">
                             <MapPin className="w-3 h-3 text-[#FF007F]" />
                             {ad.zona.split(' - ')[0]}
+                          </span>
+                        </div>
+
+                        {/* Social Proof Metric Badge */}
+                        <div className="flex items-center justify-between text-[11px] bg-[#FFE600]/30 border border-black px-2 py-1 font-bold text-black">
+                          <span className="flex items-center gap-1 text-[#FF007F]">
+                            <Flame className="w-3.5 h-3.5 fill-[#FF007F]" />
+                            <span>{Math.max(14, (ad.couponsRedeemed || 0) + 12)} canjeados hoy</span>
+                          </span>
+                          <span className="text-black font-90s text-[10px] bg-white px-1.5 py-0.5 border border-black">
+                            Quedan {ad.couponsLeft ?? 8}
                           </span>
                         </div>
 

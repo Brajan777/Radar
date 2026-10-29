@@ -33,11 +33,13 @@ import {
   Key,
   Layers,
   Grid,
-  List
+  List,
+  Share2
 } from 'lucide-react';
 import { EventItem, UserProfile, EventCategory, SurZona, MunicipioSur, EntrepreneurAd, AdSpaceType } from '../types';
 import { DragonRadarLogo } from './DragonRadarLogo';
 import { ZONAS_BY_MUNICIPIO } from './HeroSection';
+import { SocialPromotionHub } from './SocialPromotionHub';
 import { 
   getSupabaseConfig, 
   saveSupabaseCredentials, 
@@ -89,7 +91,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onSyncSupabase,
   onOpenBusinessPortal,
 }) => {
-  const [adminTab, setAdminTab] = useState<'events' | 'ads' | 'subagents' | 'users'>('events');
+  const [adminTab, setAdminTab] = useState<'events' | 'ads' | 'subagents' | 'users' | 'social'>('events');
   const [eventViewMode, setEventViewMode] = useState<'cards' | 'table'>('cards');
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -343,6 +345,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {[
             { id: 'events', label: 'Gestión de Eventos', icon: Calendar, count: events.length },
             { id: 'ads', label: 'Ads de Emprendedores', icon: Store, count: entrepreneurAds.length },
+            { id: 'social', label: 'Estudio de Redes', icon: Share2 },
             { id: 'subagents', label: 'Subagente IA', icon: Sparkles },
             { id: 'users', label: 'Padrón Vecinal', icon: Users, count: 4890 },
           ].map((tab) => {
@@ -1205,6 +1208,13 @@ CREATE POLICY "Permitir eliminacion" ON public.entrepreneurs FOR DELETE TO anon,
           <p className="text-xs text-slate-600">
             Más de 4,890 vecinos y familias registradas en las 12 zonas para recibir alertas de proximidad y pases digitales QR.
           </p>
+        </div>
+      )}
+
+      {/* Tab 6: Social Promotion Studio */}
+      {adminTab === 'social' && (
+        <div className="space-y-4">
+          <SocialPromotionHub events={events} />
         </div>
       )}
 

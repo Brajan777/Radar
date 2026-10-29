@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { 
   INITIAL_EVENTS, 
   INITIAL_SUBAGENTS, 
@@ -11,22 +11,12 @@ import {
 import { EventItem, UserProfile, PlatformMetrics, AiSubagent, EntrepreneurAd } from './types';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
-import { HowItWorksSection } from './components/HowItWorksSection';
 import { EntrepreneurAdsSection } from './components/EntrepreneurAdsSection';
-import { SocialPromotionHub } from './components/SocialPromotionHub';
 import { EventCard } from './components/EventCard';
-import { InteractiveCalendar } from './components/InteractiveCalendar';
-import { SubagentsHub } from './components/SubagentsHub';
-import { AdminPanel } from './components/AdminPanel';
-import { BusinessPortal } from './components/BusinessPortal';
 import { PlatformStats } from './components/PlatformStats';
-import { EventModal } from './components/EventModal';
-import { ProposeEventModal } from './components/ProposeEventModal';
-import { UserAuthModal } from './components/UserAuthModal';
-import { SocialShareModal } from './components/SocialShareModal';
-import { AdminAuthModal } from './components/AdminAuthModal';
-import { FloatingConcierge } from './components/FloatingConcierge';
 import { DragonRadarLogo } from './components/DragonRadarLogo';
+import { WhatsAppCommunityBar, FloatingWhatsAppButton } from './components/WhatsAppCommunityBar';
+import { PwaInstallBanner } from './components/PwaInstallBanner';
 import { triggerBrowserPushNotification, calculateDistanceKm, LatLng } from './utils/geo';
 import { 
   saveEntrepreneurToSupabase, 
@@ -56,8 +46,25 @@ import {
   Store,
   Lock,
   LogOut,
-  Ticket
+  Ticket,
+  Flame,
+  Utensils,
+  ChevronDown,
+  ChevronUp,
+  SlidersHorizontal,
+  LocateFixed
 } from 'lucide-react';
+
+// Code-Splitting con React.lazy para optimizar la velocidad y el bundle inicial en móviles
+const AdminPanel = React.lazy(() => import('./components/AdminPanel').then(m => ({ default: m.AdminPanel })));
+const BusinessPortal = React.lazy(() => import('./components/BusinessPortal').then(m => ({ default: m.BusinessPortal })));
+const InteractiveCalendar = React.lazy(() => import('./components/InteractiveCalendar').then(m => ({ default: m.InteractiveCalendar })));
+const EventModal = React.lazy(() => import('./components/EventModal').then(m => ({ default: m.EventModal })));
+const ProposeEventModal = React.lazy(() => import('./components/ProposeEventModal').then(m => ({ default: m.ProposeEventModal })));
+const UserAuthModal = React.lazy(() => import('./components/UserAuthModal').then(m => ({ default: m.UserAuthModal })));
+const SocialShareModal = React.lazy(() => import('./components/SocialShareModal').then(m => ({ default: m.SocialShareModal })));
+const AdminAuthModal = React.lazy(() => import('./components/AdminAuthModal').then(m => ({ default: m.AdminAuthModal })));
+const FloatingConcierge = React.lazy(() => import('./components/FloatingConcierge').then(m => ({ default: m.FloatingConcierge })));
 
 export default function App() {
   // Estados directos en memoria (sin localStorage para garantizar siempre los datos más recientes en Vercel)
@@ -85,6 +92,11 @@ export default function App() {
   const [selectedSourceType, setSelectedSourceType] = useState<'all' | 'radar' | 'municipal'>('all');
   const [quickFilter, setQuickFilter] = useState<string>('all');
   const [eventDisplayMode, setEventDisplayMode] = useState<'grid' | 'calendar'>('grid');
+
+  // Estados de optimización de rendimiento, orden por proximidad y filtros colapsables
+  const [sortByProximity, setSortByProximity] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showWhatsAppCommunityBar, setShowWhatsAppCommunityBar] = useState(true);
 
   // Modals
   const [selectedEventModal, setSelectedEventModal] = useState<EventItem | null>(null);
@@ -222,7 +234,19 @@ export default function App() {
       (selectedSourceType === 'municipal' && (ev.sourceType === 'municipal' || ev.organizer?.type?.includes('Alcaldía')));
 
     let matchesQuick = true;
-    if (quickFilter === 'free') {
+    if (quickFilter === 'today') {
+      // Coincidencias con hoy o fechas activas de la temporada
+      const todayIso = new Date().toISOString().split('T')[0];
+      matchesQuick = ev.date === todayIso || ['2026-10-23', '2026-10-24', '2026-10-25', '2026-10-28', '2026-10-31', '2026-11-01'].includes(ev.date);
+    } else if (quickFilter === 'eat_now') {
+      matchesQuick = ev.category === 'Gastronómico' || ev.tags.some(t => 
+        t.toLowerCase().includes('gastro') || 
+        t.toLowerCase().includes('comida') || 
+        t.toLowerCase().includes('chuchito') || 
+        t.toLowerCase().includes('fiambre') || 
+        t.toLowerCase().includes('sabor')
+      );
+    } else if (quickFilter === 'free') {
       matchesQuick = ev.cost.toLowerCase().includes('gratis') || ev.cost.toLowerCase().includes('libre');
     } else if (quickFilter === 'sports') {
       matchesQuick = ev.category === 'Deportivo' || ev.tags.some(t => t.toLowerCase().includes('bici') || t.toLowerCase().includes('fútbol'));
@@ -234,6 +258,42 @@ export default function App() {
 
     return matchesSearch && matchesMunicipio && matchesZona && matchesCategory && matchesSource && matchesQuick;
   });
+
+  // Toggle de ordenamiento 1-toque por proximidad GPS
+  const toggleProximitySort = () => {
+    if (!sortByProximity) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setUserCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            setIsGeoActive(true);
+            setSortByProximity(true);
+            showToast('📍 ¡Ordenado por cercanía a tu ubicación GPS actual!');
+          },
+          () => {
+            setSortByProximity(true);
+            showToast('📍 Ordenado por cercanía al centro neurálgico del Sur.');
+          },
+          { timeout: 6000 }
+        );
+      } else {
+        setSortByProximity(true);
+      }
+    } else {
+      setSortByProximity(false);
+      showToast('Orden estándar restaurado.');
+    }
+  };
+
+  // Eventos ordenados en memoria para máximo rendimiento
+  const displayEvents = useMemo(() => {
+    if (!sortByProximity) return filteredEvents;
+    return [...filteredEvents].sort((a, b) => {
+      const distA = calculateDistanceKm(userCoords, a.coordinates);
+      const distB = calculateDistanceKm(userCoords, b.coordinates);
+      return distA - distB;
+    });
+  }, [filteredEvents, sortByProximity, userCoords]);
 
   // Sincronización automática de emprendedores registrados en Supabase
   useEffect(() => {
@@ -386,13 +446,19 @@ export default function App() {
         </div>
       )}
 
-      {/* Global Navigation Header: Radar Villa Nueva */}
+      {/* PWA Smart Install Banner */}
+      <PwaInstallBanner />
+
+      {/* Global Navigation Header: Radar Sur */}
       <Navbar
         currentTab={currentTab}
         onSelectTab={(tab) => {
           setCurrentTab(tab);
           if (tab === 'admin') {
             setCurrentView('admin');
+          } else if (tab === 'calendario') {
+            setEventDisplayMode('calendar');
+            scrollToSection('eventos');
           } else {
             setCurrentView('website');
             scrollToSection(tab);
@@ -406,9 +472,14 @@ export default function App() {
         onOpenProposeModal={() => setIsProposeModalOpen(true)}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
         onOpenAdmin={requestAdminAccess}
-        onOpenSocialModal={() => scrollToSection('redes-sociales')}
+        onOpenSocialModal={() => scrollToSection('eventos')}
         unreadNotificationsCount={1}
       />
+
+      {/* WhatsApp Community VIP Callout Bar (High Conversion) */}
+      {showWhatsAppCommunityBar && currentView === 'website' && (
+        <WhatsAppCommunityBar onDismiss={() => setShowWhatsAppCommunityBar(false)} />
+      )}
 
       {/* VIEW 1: Dedicated Admin Panel Workspace */}
       {currentView === 'admin' && (
@@ -451,43 +522,57 @@ export default function App() {
             </div>
           </div>
 
-          <AdminPanel
-            events={events}
-            currentUser={user}
-            entrepreneurAds={entrepreneurAds}
-            onUpdateEvent={handleUpdateEvent}
-            onDeleteEvent={handleDeleteEvent}
-            onCreateEvent={handleProposeEvent}
-            onUpdateAd={handleUpdateEntrepreneurAd}
-            onDeleteAd={handleDeleteEntrepreneurAd}
-            onSyncSupabase={handleSyncSupabase}
-            onOpenBusinessPortal={(bId) => {
-              setActiveBusinessId(bId);
-              setCurrentView('business-portal');
-              window.location.hash = '#negocio';
-            }}
-          />
+          <Suspense fallback={
+            <div className="p-12 text-center bg-white border-4 border-black font-90s text-black text-sm shadow-[4px_4px_0_#000]">
+              <DragonRadarLogo size="md" className="mx-auto mb-2" />
+              <span>CARGANDO PANEL DE ADMINISTRACIÓN...</span>
+            </div>
+          }>
+            <AdminPanel
+              events={events}
+              currentUser={user}
+              entrepreneurAds={entrepreneurAds}
+              onUpdateEvent={handleUpdateEvent}
+              onDeleteEvent={handleDeleteEvent}
+              onCreateEvent={handleProposeEvent}
+              onUpdateAd={handleUpdateEntrepreneurAd}
+              onDeleteAd={handleDeleteEntrepreneurAd}
+              onSyncSupabase={handleSyncSupabase}
+              onOpenBusinessPortal={(bId) => {
+                setActiveBusinessId(bId);
+                setCurrentView('business-portal');
+                window.location.hash = '#negocio';
+              }}
+            />
+          </Suspense>
         </div>
       )}
 
       {/* VIEW 2: Dedicated Business Portal Workspace for Entrepreneurs & Coupons */}
       {currentView === 'business-portal' && (
-        <BusinessPortal
-          businessAds={entrepreneurAds}
-          activeBusinessId={activeBusinessId}
-          events={events}
-          onSelectBusiness={(id) => setActiveBusinessId(id)}
-          onUpdateBusiness={handleUpdateEntrepreneurAd}
-          onExitPortal={() => {
-            setCurrentView('website');
-            window.location.hash = '';
-          }}
-          onGoToRegister={() => {
-            setCurrentView('website');
-            window.location.hash = '#emprendedores';
-            scrollToSection('emprendedores');
-          }}
-        />
+        <Suspense fallback={
+          <div className="p-12 text-center bg-white border-4 border-black font-90s text-black text-sm shadow-[4px_4px_0_#000] max-w-lg mx-auto my-12">
+            <DragonRadarLogo size="md" className="mx-auto mb-2" />
+            <span>CARGANDO PORTAL DE NEGOCIOS...</span>
+          </div>
+        }>
+          <BusinessPortal
+            businessAds={entrepreneurAds}
+            activeBusinessId={activeBusinessId}
+            events={events}
+            onSelectBusiness={(id) => setActiveBusinessId(id)}
+            onUpdateBusiness={handleUpdateEntrepreneurAd}
+            onExitPortal={() => {
+              setCurrentView('website');
+              window.location.hash = '';
+            }}
+            onGoToRegister={() => {
+              setCurrentView('website');
+              window.location.hash = '#emprendedores';
+              scrollToSection('emprendedores');
+            }}
+          />
+        </Suspense>
       )}
 
       {/* VIEW 3: The Complete Living Website Landing & Exploration Experience */}
@@ -503,46 +588,42 @@ export default function App() {
             onZonaChange={setSelectedZona}
             quickFilter={quickFilter}
             onQuickFilterChange={setQuickFilter}
-            onOpenCalendar={() => scrollToSection('calendario')}
+            onOpenCalendar={() => {
+              setEventDisplayMode('calendar');
+              scrollToSection('eventos');
+            }}
             onOpenPropose={() => setIsProposeModalOpen(true)}
-            onOpenShareModal={() => scrollToSection('redes-sociales')}
-            onScrollToExplanation={() => scrollToSection('como-funciona')}
+            onOpenShareModal={() => scrollToSection('eventos')}
+            onScrollToExplanation={() => scrollToSection('eventos')}
             onScrollToEvents={() => scrollToSection('eventos')}
-            onScrollToSocial={() => scrollToSection('redes-sociales')}
+            onScrollToSocial={() => scrollToSection('eventos')}
             userCoords={userCoords}
             isGeoActive={isGeoActive}
             totalEventsCount={events.length}
           />
 
-          {/* Section 2: Visual Explanation of Purpose ("¿Cómo funciona el Radar?") */}
-          <HowItWorksSection
-            onExploreEvents={() => scrollToSection('eventos')}
-            onOpenShareModal={() => scrollToSection('redes-sociales')}
-            onOpenPropose={() => setIsProposeModalOpen(true)}
-          />
-
-          {/* Section 3: Featured Events & Activity Showcase in 90s Pop Style */}
-          <section id="eventos" className="py-14 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          {/* Section 2: Featured Events & Activity Showcase in 90s Pop Style */}
+          <section id="eventos" className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
             {/* Header and View Switcher */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
               <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-3 rotate-[-1deg]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-2 rotate-[-1deg]">
                   <DragonRadarLogo size="sm" />
                   <span>★ AGENDA SUR · 3 MUNICIPIOS ★</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
+                <h2 className="text-2xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
                   Actividades Detectadas en Radar Sur
                 </h2>
-                <p className="mt-2 text-black text-sm sm:text-base font-bold">
-                  Explora las actividades familiares, gastronómicas y deportivas en Villa Nueva, San Miguel Petapa y Villa Canales con enlaces directos a Google Maps o Waze.
+                <p className="mt-1 text-black text-xs sm:text-base font-bold">
+                  Encuentra planes familiares, gastronomía y eventos en Villa Nueva, San Miguel Petapa y Villa Canales con rutas directas en Maps/Waze.
                 </p>
               </div>
 
               {/* View Switch Buttons */}
-              <div className="flex items-center gap-1.5 p-1 bg-white border-3 border-black shadow-[4px_4px_0_#000] shrink-0 text-xs font-90s">
+              <div className="flex items-center gap-1.5 p-1 bg-white border-3 border-black shadow-[4px_4px_0_#000] shrink-0 text-xs font-90s self-start md:self-auto">
                 <button
                   onClick={() => setEventDisplayMode('grid')}
-                  className={`px-4 py-2 border-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 sm:px-4 sm:py-2 border-2 transition-all cursor-pointer flex items-center gap-1.5 ${
                     eventDisplayMode === 'grid'
                       ? 'bg-[#FFE600] text-black border-black shadow-[2px_2px_0_#000]'
                       : 'border-transparent text-black hover:bg-slate-100'
@@ -553,7 +634,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setEventDisplayMode('calendar')}
-                  className={`px-4 py-2 border-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 sm:px-4 sm:py-2 border-2 transition-all cursor-pointer flex items-center gap-1.5 ${
                     eventDisplayMode === 'calendar'
                       ? 'bg-[#FF007F] text-white border-black shadow-[2px_2px_0_#000]'
                       : 'border-transparent text-black hover:bg-slate-100'
@@ -565,103 +646,199 @@ export default function App() {
               </div>
             </div>
 
-            {/* Municipality Selector Chips */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t-3 border-black">
-              <span className="text-xs font-90s uppercase text-black mr-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[#FF007F]" /> MUNICIPIO:
-              </span>
-              {[
-                { id: 'all', label: '★ TODO EL SUR' },
-                { id: 'Villa Nueva', label: 'VILLA NUEVA' },
-                { id: 'San Miguel Petapa', label: 'SAN MIGUEL PETAPA' },
-                { id: 'Villa Canales', label: 'VILLA CANALES' },
-              ].map((muni) => {
-                const isActive = selectedMunicipio === muni.id;
-                return (
-                  <button
-                    key={muni.id}
-                    onClick={() => {
-                      setSelectedMunicipio(muni.id);
-                      setSelectedZona('all');
-                    }}
-                    className={`px-3.5 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer ${
-                      isActive
-                        ? 'bg-black text-[#FFE600] shadow-[3px_3px_0_#000] -translate-y-0.5'
-                        : 'bg-white text-black hover:bg-[#FFE600] shadow-[1.5px_1.5px_0_#000]'
-                    }`}
-                  >
-                    {muni.label}
-                  </button>
-                );
-              })}
-            </div>
+            {/* Fast 1-Touch Impulse Bar & Proximity Sorting (Mobile-Optimized) */}
+            <div className="p-3 sm:p-4 bg-white border-3 border-black shadow-[4px_4px_0_#000] space-y-3">
+              
+              {/* Row 1: Fast Filters */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <span className="text-[11px] font-90s text-black uppercase shrink-0 flex items-center gap-1">
+                  <Zap className="w-3.5 h-3.5 text-[#FF007F]" /> RÁPIDOS:
+                </span>
 
-            {/* Source Switcher: Radar vs Municipal */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-90s uppercase text-black mr-1 flex items-center gap-1">
-                <Radio className="w-3.5 h-3.5 text-[#00F0FF]" /> FUENTE:
-              </span>
-              {[
-                { id: 'all', label: 'TODAS LAS FUENTES' },
-                { id: 'radar', label: '★ EXCLUSIVOS RADAR SUR' },
-                { id: 'municipal', label: '🏛️ ALCALDÍAS MUNICIPALES (3)' },
-              ].map((src) => {
-                const isActive = selectedSourceType === src.id;
-                return (
-                  <button
-                    key={src.id}
-                    onClick={() => setSelectedSourceType(src.id as any)}
-                    className={`px-3.5 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer ${
-                      isActive
-                        ? src.id === 'radar' 
-                          ? 'bg-[#FF007F] text-white shadow-[3px_3px_0_#000] -translate-y-0.5'
-                          : 'bg-[#00F0FF] text-black shadow-[3px_3px_0_#000] -translate-y-0.5'
-                        : 'bg-white text-black hover:bg-[#FFE600] shadow-[1.5px_1.5px_0_#000]'
-                    }`}
-                  >
-                    {src.label}
-                  </button>
-                );
-              })}
-            </div>
+                <button
+                  onClick={() => setQuickFilter(quickFilter === 'today' ? 'all' : 'today')}
+                  className={`px-3 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                    quickFilter === 'today'
+                      ? 'bg-[#FF007F] text-white shadow-[2px_2px_0_#000] -translate-y-0.5'
+                      : 'bg-white text-black hover:bg-[#FFE600]'
+                  }`}
+                >
+                  <Flame className="w-3.5 h-3.5" />
+                  <span>🔥 HOY EN EL SUR</span>
+                </button>
 
-            {/* Category Filter Chips */}
-            <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-2">
-              <span className="text-xs font-90s uppercase text-black mr-1 flex items-center gap-1">
-                <Filter className="w-3.5 h-3.5 text-[#00F0FF]" /> CATEGORÍA:
-              </span>
-              {[
-                { id: 'all', label: 'TODAS LAS SEÑALES' },
-                { id: 'Familiar', label: 'FAMILIARES' },
-                { id: 'Gastronómico', label: 'GASTRONOMÍA' },
-                { id: 'Deportivo', label: 'DEPORTES' },
-                { id: 'Juventud y Arte', label: 'JUVENTUD & ARTE' },
-                { id: 'Cultural', label: 'CULTURA' },
-                { id: 'Ecológico', label: 'ECOLÓGICO' },
-              ].map((cat) => {
-                const isActive = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-3 py-1 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer ${
-                      isActive
-                        ? 'bg-[#FFE600] text-black shadow-[3px_3px_0_#000] -translate-y-0.5'
-                        : 'bg-white text-black hover:bg-slate-100 shadow-[1.5px_1.5px_0_#000]'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
+                <button
+                  onClick={() => setQuickFilter(quickFilter === 'eat_now' ? 'all' : 'eat_now')}
+                  className={`px-3 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                    quickFilter === 'eat_now'
+                      ? 'bg-[#CCFF00] text-black shadow-[2px_2px_0_#000] -translate-y-0.5'
+                      : 'bg-white text-black hover:bg-[#CCFF00]'
+                  }`}
+                >
+                  <Utensils className="w-3.5 h-3.5 text-black" />
+                  <span>🍴 COMER AHORA</span>
+                </button>
+
+                <button
+                  onClick={toggleProximitySort}
+                  className={`px-3 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                    sortByProximity
+                      ? 'bg-[#00F0FF] text-black shadow-[2px_2px_0_#000] -translate-y-0.5'
+                      : 'bg-white text-black hover:bg-[#00F0FF]'
+                  }`}
+                  title="Ordenar por proximidad física a tu ubicación GPS"
+                >
+                  <LocateFixed className="w-3.5 h-3.5 text-black" />
+                  <span>📍 {sortByProximity ? 'CERCA DE MÍ (ACTIVO)' : 'CERCA DE MÍ'}</span>
+                </button>
+
+                <button
+                  onClick={() => setQuickFilter(quickFilter === 'free' ? 'all' : 'free')}
+                  className={`px-3 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer ${
+                    quickFilter === 'free'
+                      ? 'bg-[#FFE600] text-black shadow-[2px_2px_0_#000] -translate-y-0.5'
+                      : 'bg-white text-black hover:bg-[#FFE600]'
+                  }`}
+                >
+                  <span>GRATIS</span>
+                </button>
+
+                <button
+                  onClick={() => setQuickFilter(quickFilter === 'weekend' ? 'all' : 'weekend')}
+                  className={`px-3 py-1.5 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer ${
+                    quickFilter === 'weekend'
+                      ? 'bg-black text-[#FFE600] shadow-[2px_2px_0_#000] -translate-y-0.5'
+                      : 'bg-white text-black hover:bg-slate-100'
+                  }`}
+                >
+                  <span>ESTE FINDE</span>
+                </button>
+              </div>
+
+              {/* Row 2: Municipality Switcher */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t-2 border-black/15">
+                <span className="text-[11px] font-90s uppercase text-black mr-1 flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-[#FF007F]" /> MUNICIPIO:
+                </span>
+                {[
+                  { id: 'all', label: '★ TODO EL SUR' },
+                  { id: 'Villa Nueva', label: 'VILLA NUEVA' },
+                  { id: 'San Miguel Petapa', label: 'PETAPA' },
+                  { id: 'Villa Canales', label: 'VILLA CANALES' },
+                ].map((muni) => {
+                  const isActive = selectedMunicipio === muni.id;
+                  return (
+                    <button
+                      key={muni.id}
+                      onClick={() => {
+                        setSelectedMunicipio(muni.id);
+                        setSelectedZona('all');
+                      }}
+                      className={`px-3 py-1 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer ${
+                        isActive
+                          ? 'bg-black text-[#FFE600] shadow-[2px_2px_0_#000] -translate-y-0.5'
+                          : 'bg-white text-black hover:bg-[#FFE600]'
+                      }`}
+                    >
+                      {muni.label}
+                    </button>
+                  );
+                })}
+
+                {/* Collapsible Toggle Button for Advanced Filters */}
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className={`ml-auto px-3 py-1 text-xs font-90s border-2 border-black transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
+                    showAdvancedFilters || selectedCategory !== 'all' || selectedSourceType !== 'all' || selectedZona !== 'all'
+                      ? 'bg-[#FFE600] text-black shadow-[2px_2px_0_#000]'
+                      : 'bg-slate-100 text-black hover:bg-white'
+                  }`}
+                >
+                  <SlidersHorizontal className="w-3 h-3" />
+                  <span>FILTROS AVANZADOS</span>
+                  {showAdvancedFilters ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Collapsible Advanced Filters Drawer */}
+              {showAdvancedFilters && (
+                <div className="pt-3 border-t-2 border-black/20 space-y-3 bg-[#FFFDF0] p-3 border-2 border-black mt-2">
+                  {/* Category Chips */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-90s uppercase text-black mr-1 flex items-center gap-1">
+                      <Filter className="w-3 h-3 text-[#00F0FF]" /> CATEGORÍA:
+                    </span>
+                    {[
+                      { id: 'all', label: 'TODAS' },
+                      { id: 'Familiar', label: 'FAMILIARES' },
+                      { id: 'Gastronómico', label: 'GASTRONOMÍA' },
+                      { id: 'Deportivo', label: 'DEPORTES' },
+                      { id: 'Juventud y Arte', label: 'JUVENTUD & ARTE' },
+                      { id: 'Cultural', label: 'CULTURA' },
+                      { id: 'Ecológico', label: 'ECOLÓGICO' },
+                    ].map((cat) => {
+                      const isActive = selectedCategory === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`px-2.5 py-0.5 text-[11px] font-90s border border-black cursor-pointer ${
+                            isActive ? 'bg-[#FFE600] text-black shadow-[1px_1px_0_#000]' : 'bg-white text-black hover:bg-slate-100'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Source Switcher */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] font-90s uppercase text-black mr-1 flex items-center gap-1">
+                      <Radio className="w-3 h-3 text-[#FF007F]" /> FUENTE:
+                    </span>
+                    {[
+                      { id: 'all', label: 'TODAS LAS FUENTES' },
+                      { id: 'radar', label: '★ EXCLUSIVOS RADAR' },
+                      { id: 'municipal', label: '🏛️ ALCALDÍAS MUNICIPALES' },
+                    ].map((src) => {
+                      const isActive = selectedSourceType === src.id;
+                      return (
+                        <button
+                          key={src.id}
+                          onClick={() => setSelectedSourceType(src.id as any)}
+                          className={`px-2.5 py-0.5 text-[11px] font-90s border border-black cursor-pointer ${
+                            isActive ? 'bg-[#00F0FF] text-black shadow-[1px_1px_0_#000]' : 'bg-white text-black hover:bg-slate-100'
+                          }`}
+                        >
+                          {src.label}
+                        </button>
+                      );
+                    })}
+
+                    <button
+                      onClick={() => {
+                        setSelectedCategory('all');
+                        setSelectedSourceType('all');
+                        setSelectedZona('all');
+                        setSearchQuery('');
+                      }}
+                      className="ml-auto text-[10px] font-90s text-red-600 underline cursor-pointer"
+                    >
+                      Restablecer filtros
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </div>
 
             {/* Sub-View: Grid View (Default) */}
             {eventDisplayMode === 'grid' && (
               <>
-                {filteredEvents.length > 0 ? (
+                {displayEvents.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                    {filteredEvents.map((event) => (
+                    {displayEvents.map((event) => (
                       <EventCard
                         key={event.id}
                         event={event}
@@ -674,20 +851,23 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
-                  <div className="p-12 text-center bg-white border-4 border-black space-y-4 max-w-md mx-auto shadow-[6px_6px_0_#000]">
+                  <div className="p-10 text-center bg-white border-4 border-black space-y-4 max-w-md mx-auto shadow-[6px_6px_0_#000]">
                     <DragonRadarLogo size="lg" className="mx-auto" />
-                    <h3 className="text-lg font-90s text-black uppercase">
-                      Sin señales detectadas con estos filtros
+                    <h3 className="text-base sm:text-lg font-90s text-black uppercase">
+                      Sin actividades detectadas
                     </h3>
                     <p className="text-xs text-black font-bold">
-                      Prueba seleccionando "Todos los Eventos" o "Todas las Zonas".
+                      Prueba seleccionando "Todo el Sur" o desactivando filtros activos.
                     </p>
                     <button
                       onClick={() => {
                         setSearchQuery('');
+                        setSelectedMunicipio('all');
                         setSelectedZona('all');
                         setSelectedCategory('all');
                         setSelectedSourceType('all');
+                        setQuickFilter('all');
+                        setSortByProximity(false);
                       }}
                       className="px-5 py-2.5 text-xs font-90s bg-[#FF007F] text-white border-2 border-black shadow-[3px_3px_0_#000] cursor-pointer"
                     >
@@ -700,16 +880,22 @@ export default function App() {
 
             {/* Sub-View: Calendar View */}
             {eventDisplayMode === 'calendar' && (
-              <InteractiveCalendar
-                events={filteredEvents}
-                onSelectEvent={(ev) => setSelectedEventModal(ev)}
-                onQuickRsvp={handleRsvp}
-                onOpenShareModal={(ev) => setSelectedShareEvent(ev)}
-              />
+              <Suspense fallback={
+                <div className="p-12 text-center bg-white border-4 border-black font-90s text-black text-sm">
+                  CARGANDO CALENDARIO...
+                </div>
+              }>
+                <InteractiveCalendar
+                  events={displayEvents}
+                  onSelectEvent={(ev) => setSelectedEventModal(ev)}
+                  onQuickRsvp={handleRsvp}
+                  onOpenShareModal={(ev) => setSelectedShareEvent(ev)}
+                />
+              </Suspense>
             )}
           </section>
 
-          {/* Section 4: Entrepreneur Ads & Commercial Showcase ("Radar Emprendedores") */}
+          {/* Section 3: Entrepreneur Ads & Commercial Showcase ("Radar Emprendedores") */}
           <EntrepreneurAdsSection
             ads={entrepreneurAds}
             events={events}
@@ -721,49 +907,18 @@ export default function App() {
             }}
           />
 
-          {/* Section 5: Social Promotion Studio */}
-          <SocialPromotionHub
-            events={events}
-            onOpenEventModal={(ev) => setSelectedEventModal(ev)}
-          />
-
-          {/* Section 5: Full Interactive Calendar Section */}
-          <section id="calendario" className="py-14 sm:py-20 bg-white border-b-4 border-black">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          {/* Section 4: Platform Statistics & Civic Impact */}
+          <section id="estadisticas" className="py-12 sm:py-16 bg-[#FFFDF0] bg-grid-90s border-b-4 border-black">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
               <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FFE600] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-3 rotate-[-1deg]">
-                  <CalendarDays className="w-3.5 h-3.5 text-black" />
-                  <span>PLANIFICACIÓN MENSUAL · RADAR SUR</span>
-                </div>
-                <h2 className="text-3xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
-                  Calendario de Actividades del Sur
-                </h2>
-                <p className="mt-2 text-black text-sm sm:text-base font-bold">
-                  Navega por días y fines de semana para planificar tus salidas familiares en Villa Nueva, San Miguel Petapa y Villa Canales.
-                </p>
-              </div>
-
-              <InteractiveCalendar
-                events={events}
-                onSelectEvent={(ev) => setSelectedEventModal(ev)}
-                onQuickRsvp={handleRsvp}
-                onOpenShareModal={(ev) => setSelectedShareEvent(ev)}
-              />
-            </div>
-          </section>
-
-          {/* Section 6: Platform Statistics & Civic Impact */}
-          <section id="estadisticas" className="py-14 sm:py-20 bg-[#FFFDF0] bg-grid-90s border-b-4 border-black">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-              <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00F0FF] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-3 rotate-[-1deg]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00F0FF] border-2 border-black shadow-[3px_3px_0_#000] text-xs font-90s text-black mb-2 rotate-[-1deg]">
                   <Sparkles className="w-3.5 h-3.5 text-black" />
                   <span>TRANSPARENCIA & PARTICIPACIÓN SUR</span>
                 </div>
-                <h2 className="text-3xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
+                <h2 className="text-2xl sm:text-4xl font-90s text-black uppercase tracking-tight leading-tight">
                   Impacto en Números
                 </h2>
-                <p className="mt-2 text-black text-sm sm:text-base font-bold">
+                <p className="mt-1 text-black text-xs sm:text-base font-bold">
                   Datos en tiempo real sobre la afluencia familiar proyectada y participación ciudadana en Villa Nueva, San Miguel Petapa y Villa Canales.
                 </p>
               </div>
@@ -824,12 +979,28 @@ export default function App() {
               </h4>
               <ul className="space-y-2 text-white/80 font-bold">
                 <li><a href="#inicio" onClick={() => scrollToSection('inicio')} className="hover:text-[#FFE600] transition-colors">Inicio</a></li>
-                <li><a href="#como-funciona" onClick={() => scrollToSection('como-funciona')} className="hover:text-[#FFE600] transition-colors">¿Cómo Funciona?</a></li>
                 <li><a href="#eventos" onClick={() => scrollToSection('eventos')} className="hover:text-[#FFE600] transition-colors">Eventos en Radar</a></li>
                 <li><a href="#emprendedores" onClick={() => scrollToSection('emprendedores')} className="hover:text-[#FF007F] text-[#CCFF00] transition-colors">Emprendedores & Cupones QR</a></li>
-                <li><a href="#calendario" onClick={() => scrollToSection('calendario')} className="hover:text-[#FFE600] transition-colors">Calendario Mensual</a></li>
-                <li><a href="#redes-sociales" onClick={() => scrollToSection('redes-sociales')} className="hover:text-[#FFE600] transition-colors">Estudio Social</a></li>
+                <li>
+                  <button 
+                    onClick={() => {
+                      setEventDisplayMode('calendar');
+                      scrollToSection('eventos');
+                    }} 
+                    className="hover:text-[#FFE600] transition-colors text-left cursor-pointer"
+                  >
+                    Calendario Mensual
+                  </button>
+                </li>
                 <li><a href="#estadisticas" onClick={() => scrollToSection('estadisticas')} className="hover:text-[#FFE600] transition-colors">Impacto & Estadísticas</a></li>
+                <li>
+                  <button 
+                    onClick={requestAdminAccess} 
+                    className="hover:text-[#00F0FF] text-[#00F0FF] transition-colors text-left cursor-pointer"
+                  >
+                    Panel Admin (Redes & Eventos)
+                  </button>
+                </li>
               </ul>
             </div>
 
@@ -918,66 +1089,71 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Modals & Overlays */}
-      {selectedEventModal && (
-        <EventModal
-          event={selectedEventModal}
-          isOpen={!!selectedEventModal}
-          userCoords={userCoords}
-          user={user}
-          onClose={() => setSelectedEventModal(null)}
-          onConfirmRsvp={(eventId, count) => {
-            const ev = events.find(e => e.id === eventId);
-            if (ev) handleRsvp(ev);
+      {/* Modals & Overlays envueltos en Suspense para carga diferida ultrarrápida */}
+      <Suspense fallback={null}>
+        {selectedEventModal && (
+          <EventModal
+            event={selectedEventModal}
+            isOpen={!!selectedEventModal}
+            userCoords={userCoords}
+            user={user}
+            onClose={() => setSelectedEventModal(null)}
+            onConfirmRsvp={(eventId, count) => {
+              const ev = events.find(e => e.id === eventId);
+              if (ev) handleRsvp(ev);
+            }}
+            onOpenShare={(ev: EventItem) => {
+              setSelectedEventModal(null);
+              setSelectedShareEvent(ev);
+            }}
+          />
+        )}
+
+        {selectedShareEvent && (
+          <SocialShareModal
+            event={selectedShareEvent}
+            isOpen={!!selectedShareEvent}
+            onClose={() => setSelectedShareEvent(null)}
+          />
+        )}
+
+        {isProposeModalOpen && (
+          <ProposeEventModal
+            isOpen={isProposeModalOpen}
+            onClose={() => setIsProposeModalOpen(false)}
+            onSubmitEvent={handleProposeEvent}
+            user={user}
+          />
+        )}
+
+        {isProfileModalOpen && (
+          <UserAuthModal
+            user={user}
+            isOpen={isProfileModalOpen}
+            onClose={() => setIsProfileModalOpen(false)}
+            onUpdateUser={setUser}
+            events={events}
+          />
+        )}
+
+        {/* Secret Password-Protected Admin Auth Modal */}
+        <AdminAuthModal
+          isOpen={isAdminAuthModalOpen}
+          onClose={() => {
+            setIsAdminAuthModalOpen(false);
+            if (window.location.hash.toLowerCase() === '#admin') {
+              window.location.hash = '';
+            }
           }}
-          onOpenShare={(ev: EventItem) => {
-            setSelectedEventModal(null);
-            setSelectedShareEvent(ev);
-          }}
+          onSuccess={handleAdminAuthSuccess}
         />
-      )}
 
-      {selectedShareEvent && (
-        <SocialShareModal
-          event={selectedShareEvent}
-          isOpen={!!selectedShareEvent}
-          onClose={() => setSelectedShareEvent(null)}
-        />
-      )}
+        {/* Floating Interactive AI Concierge Widget */}
+        <FloatingConcierge user={user} />
+      </Suspense>
 
-      {isProposeModalOpen && (
-        <ProposeEventModal
-          isOpen={isProposeModalOpen}
-          onClose={() => setIsProposeModalOpen(false)}
-          onSubmitEvent={handleProposeEvent}
-          user={user}
-        />
-      )}
-
-      {isProfileModalOpen && (
-        <UserAuthModal
-          user={user}
-          isOpen={isProfileModalOpen}
-          onClose={() => setIsProfileModalOpen(false)}
-          onUpdateUser={setUser}
-          events={events}
-        />
-      )}
-
-      {/* Secret Password-Protected Admin Auth Modal */}
-      <AdminAuthModal
-        isOpen={isAdminAuthModalOpen}
-        onClose={() => {
-          setIsAdminAuthModalOpen(false);
-          if (window.location.hash.toLowerCase() === '#admin') {
-            window.location.hash = '';
-          }
-        }}
-        onSuccess={handleAdminAuthSuccess}
-      />
-
-      {/* Floating Interactive AI Concierge Widget */}
-      <FloatingConcierge user={user} />
+      {/* Floating High-Converting WhatsApp VIP Button */}
+      {currentView === 'website' && <FloatingWhatsAppButton />}
 
     </div>
   );
